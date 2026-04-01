@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check, Mic, MicOff } from 'lucide-react';
+import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check } from 'lucide-react';
 
 // --- Floating Emoji Component ---
 const FloatingEmoji = ({ feedbackType }) => {
@@ -63,255 +63,24 @@ const FloatingEmoji = ({ feedbackType }) => {
       <style>{`
         @keyframes float-full {
           0% { 
-            transform: translateY(0) scale(0.3) rotate(0deg); 
+            transform: translateY(0) scale(0.8); 
             opacity: 0; 
           }
           5% { 
-            opacity: 0.7; 
-            transform: translateY(-50px) scale(0.8) rotate(5deg); 
-          }
-          20% { 
-            transform: translateY(-20vh) scale(1) rotate(-5deg); 
-            opacity: 0.8; 
-          }
-          40% { 
-            transform: translateY(-40vh) scale(1.1) rotate(5deg); 
-            opacity: 0.7; 
-          }
-          60% { 
-            transform: translateY(-60vh) scale(1) rotate(-3deg); 
             opacity: 0.6; 
           }
-          80% { 
-            transform: translateY(-80vh) scale(0.9) rotate(3deg); 
-            opacity: 0.4; 
+          95% { 
+            opacity: 0.5; 
           }
           100% { 
-            transform: translateY(-105vh) scale(0.7) rotate(0deg); 
+            transform: translateY(-110vh) scale(0.8); 
             opacity: 0; 
           }
         }
         .animate-float-full {
-          animation: float-full 7s ease-out forwards;
+          animation: float-full 8s linear forwards;
         }
       `}</style>
-    </div>
-  );
-};
-
-// --- Voice Input for Regular Input Fields ---
-const VoiceInput = ({ placeholder, type = 'text', className, value, onChange }) => {
-  const [localText, setLocalText] = useState(value || '');
-  const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'mn-MN';
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        const newText = localText + ' ' + transcript;
-        setLocalText(newText.trim());
-        if (onChange) onChange({ target: { value: newText.trim() } });
-      };
-
-      recognition.onerror = (e) => {
-        console.log('Speech error:', e.error);
-        setIsListening(false);
-      };
-      
-      recognition.onend = () => setIsListening(false);
-
-      recognitionRef.current = recognition;
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e) {}
-      }
-    };
-  }, [localText, onChange]);
-
-  const toggleListening = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!recognitionRef.current) {
-      alert('Таны browser дуу хүлээн авах боломжгүй байна');
-      return;
-    }
-    
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {
-        console.log('Start error:', e);
-        // Already started, stop and restart
-        recognitionRef.current.stop();
-        setTimeout(() => {
-          try {
-            recognitionRef.current.start();
-            setIsListening(true);
-          } catch(e2) {}
-        }, 100);
-      }
-    }
-  };
-
-  const handleChange = (e) => {
-    setLocalText(e.target.value);
-    if (onChange) onChange(e);
-  };
-
-  return (
-    <div className="relative">
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={localText}
-        onChange={handleChange}
-        className={`${className} pr-12`}
-      />
-      {isSupported && (
-        <button
-          type="button"
-          onClick={toggleListening}
-          className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
-            isListening 
-              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-        </button>
-      )}
-    </div>
-  );
-};
-
-// --- Voice Input Textarea Component ---
-const VoiceTextarea = ({ placeholder, rows = 4, className, value, onChange }) => {
-  const [localText, setLocalText] = useState(value || '');
-  const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.lang = 'mn-MN';
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            transcript += event.results[i][0].transcript + ' ';
-          }
-        }
-        if (transcript) {
-          const newText = localText + transcript;
-          setLocalText(newText);
-          if (onChange) onChange({ target: { value: newText } });
-        }
-      };
-
-      recognition.onerror = (e) => {
-        console.log('Speech error:', e.error);
-        setIsListening(false);
-      };
-      
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch(e) {}
-      }
-    };
-  }, [localText, onChange]);
-
-  const toggleListening = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!recognitionRef.current) {
-      alert('Таны browser дуу хүлээн авах боломжгүй байна');
-      return;
-    }
-    
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {
-        recognitionRef.current.stop();
-        setTimeout(() => {
-          try {
-            recognitionRef.current.start();
-            setIsListening(true);
-          } catch(e2) {}
-        }, 100);
-      }
-    }
-  };
-
-  const handleChange = (e) => {
-    setLocalText(e.target.value);
-    if (onChange) onChange(e);
-  };
-
-  return (
-    <div className="relative">
-      <textarea
-        rows={rows}
-        placeholder={placeholder}
-        value={localText}
-        onChange={handleChange}
-        className={`${className} pr-14`}
-      />
-      {isSupported && (
-        <button
-          type="button"
-          onClick={toggleListening}
-          className={`absolute right-3 top-3 p-2 rounded-xl transition-all ${
-            isListening 
-              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
-          }`}
-        >
-          {isListening ? <MicOff size={18} /> : <Mic size={18} />}
-        </button>
-      )}
-      {isListening && (
-        <div className="absolute right-3 bottom-3 flex gap-1">
-          <span className="w-1 h-3 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-          <span className="w-1 h-4 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-          <span className="w-1 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-          <span className="w-1 h-5 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '450ms' }} />
-        </div>
-      )}
     </div>
   );
 };
@@ -1281,13 +1050,13 @@ export default function App() {
                   <div className="space-y-6">
                     {activeTab === 'person' ? (
                       <>
-                        <div><label className={styles.textLabel}>Нэр <span className="text-red-500">*</span></label><VoiceInput type="text" placeholder="Болд" className={styles.inputBase} /></div>
-                        <div><label className={styles.textLabel}>Утас <span className="text-red-500">*</span></label><VoiceInput type="tel" placeholder="9911xxxx" className={styles.inputBase} /></div>
+                        <div><label className={styles.textLabel}>Нэр <span className="text-red-500">*</span></label><input type="text" placeholder="Болд" className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
+                        <div><label className={styles.textLabel}>Утас <span className="text-red-500">*</span></label><input type="tel" placeholder="9911xxxx" className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
                         <div className="relative z-20"><label className={styles.textLabel}>Салбар <span className="text-red-500">*</span></label><CustomSelect options={branches} value={branch} onChange={setBranch} placeholder="Салбараа сонгоно уу" /></div>
                       </>
                     ) : (
                       <>
-                        <div><label className={styles.textLabel}>Мэдээлэл <span className="text-red-500">*</span></label><VoiceTextarea rows={4} placeholder="Үйл ажиллагааны чиглэл..." className={`${styles.inputBase} resize-none`} /></div>
+                        <div><label className={styles.textLabel}>Мэдээлэл <span className="text-red-500">*</span></label><textarea rows={4} placeholder="Үйл ажиллагааны чиглэл..." className={`${styles.inputBase} resize-none`} style={{ fontSize: '16px' }} /></div>
                         <div><label className={styles.textLabel}>Файл</label><div className={`w-full h-24 ${styles.sunken} rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition-colors cursor-pointer border-dashed border-2 border-transparent hover:border-gray-300`}><Upload size={20} className="text-gray-500 mb-2" /><p className="text-[10px] text-gray-500 font-bold uppercase">Файл оруулах</p></div></div>
                       </>
                     )}
@@ -1332,7 +1101,7 @@ export default function App() {
                         </div>
                     </div>
                     <div className="relative z-20"><label className={styles.textLabel}>Хэнд илгээх <span className="text-red-500">*</span></label><CustomSelect options={recipients} value={recipient} onChange={setRecipient} placeholder="Албан тушаалтан..." /></div>
-                    <div><label className={styles.textLabel}>Дэлгэрэнгүй <span className="text-red-500">*</span></label><VoiceTextarea rows={4} placeholder="Санал хүсэлтээ энд бичнэ үү..." className={`${styles.inputBase} resize-none`} /></div>
+                    <div><label className={styles.textLabel}>Дэлгэрэнгүй <span className="text-red-500">*</span></label><textarea rows={4} placeholder="Санал хүсэлтээ энд бичнэ үү..." className={`${styles.inputBase} resize-none`} style={{ fontSize: '16px' }} /></div>
                     
                     {/* RATING SECTION */}
                     <div className="grid grid-cols-1 gap-6">
@@ -1365,7 +1134,7 @@ export default function App() {
                           ))}
                         </div>
                       </div>
-                      <div><label className={styles.textLabel}>Ажилтны нэр</label><VoiceInput type="text" placeholder="Заавал биш..." className={styles.inputBase} /></div>
+                      <div><label className={styles.textLabel}>Ажилтны нэр</label><input type="text" placeholder="Заавал биш..." className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
                     </div>
 
                     <div className="pt-4 flex gap-3">
