@@ -5,60 +5,94 @@ import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check, Mic,
 const FloatingEmoji = ({ feedbackType }) => {
   const [emojis, setEmojis] = useState([]);
 
+  // Хүсэлт icon SVG
+  const RequestIcon = () => (
+    <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M48 112h288v192H48z" fill="#E3F2FD" stroke="#1976D2" strokeWidth="16"/>
+      <path d="M48 304l48-48" stroke="#1976D2" strokeWidth="16"/>
+      <path d="M80 144h224M80 176h224M80 208h160" stroke="#333" strokeWidth="12" strokeLinecap="round"/>
+      <rect x="16" y="48" width="144" height="48" rx="8" fill="#2196F3" stroke="#1565C0" strokeWidth="8"/>
+      <path d="M40 72h96" stroke="#fff" strokeWidth="8" strokeLinecap="round"/>
+      <circle cx="400" cy="112" r="80" fill="#FFD54F" stroke="#333" strokeWidth="12"/>
+      <path d="M370 100c0-8 8-16 16-16s16 8 16 8" stroke="#333" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M400 100c0-8 8-16 16-16s16 8 16 8" stroke="#333" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M365 135c15 20 55 20 70 0" stroke="#333" strokeWidth="8" strokeLinecap="round" fill="none"/>
+    </svg>
+  );
+
   useEffect(() => {
-    // Emoji тохиргоо
-    const emojiMap = {
-      'Хүсэлт': '✉️',
-      'Талархал': '😊',
-      'Гомдол': '😢'
-    };
-    
-    const emoji = emojiMap[feedbackType] || '✉️';
-    
     // Шинэ emoji үүсгэх
     const interval = setInterval(() => {
       const id = Date.now();
-      const left = Math.random() * 80 + 10; // 10% - 90%
-      setEmojis(prev => [...prev.slice(-8), { id, emoji, left }]);
-    }, 800);
+      const left = Math.random() * 70 + 15; // 15% - 85%
+      setEmojis(prev => [...prev.slice(-6), { id, left }]);
+    }, 1200);
 
     return () => clearInterval(interval);
-  }, [feedbackType]);
+  }, []);
 
   // Emoji устгах
   useEffect(() => {
     const cleanup = setInterval(() => {
-      setEmojis(prev => prev.filter(e => Date.now() - e.id < 5500));
+      setEmojis(prev => prev.filter(e => Date.now() - e.id < 8000));
     }, 500);
     return () => clearInterval(cleanup);
   }, []);
 
+  // Emoji сонгох
+  const getEmoji = () => {
+    if (feedbackType === 'Талархал') return <span className="text-3xl">😊</span>;
+    if (feedbackType === 'Гомдол') return <span className="text-3xl">😢</span>;
+    return <RequestIcon />;
+  };
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      {emojis.map(({ id, emoji, left }) => (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {emojis.map(({ id, left }) => (
         <div
           key={id}
-          className="absolute text-2xl animate-float-up opacity-70"
+          className="absolute animate-float-full opacity-60"
           style={{ 
             left: `${left}%`, 
-            bottom: '-10%',
-            animationDuration: '4s'
+            bottom: '-50px',
           }}
         >
-          {emoji}
+          {getEmoji()}
         </div>
       ))}
       <style>{`
-        @keyframes float-up {
-          0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
-          10% { opacity: 1; transform: translateY(-30px) scale(1) rotate(5deg); }
-          30% { transform: translateY(-100px) scale(1.1) rotate(-5deg); opacity: 0.9; }
-          50% { transform: translateY(-200px) scale(1) rotate(5deg); opacity: 0.8; }
-          70% { transform: translateY(-300px) scale(0.9) rotate(-3deg); opacity: 0.6; }
-          100% { transform: translateY(-500px) scale(0.7) rotate(0deg); opacity: 0; }
+        @keyframes float-full {
+          0% { 
+            transform: translateY(0) scale(0.3) rotate(0deg); 
+            opacity: 0; 
+          }
+          5% { 
+            opacity: 0.7; 
+            transform: translateY(-50px) scale(0.8) rotate(5deg); 
+          }
+          20% { 
+            transform: translateY(-20vh) scale(1) rotate(-5deg); 
+            opacity: 0.8; 
+          }
+          40% { 
+            transform: translateY(-40vh) scale(1.1) rotate(5deg); 
+            opacity: 0.7; 
+          }
+          60% { 
+            transform: translateY(-60vh) scale(1) rotate(-3deg); 
+            opacity: 0.6; 
+          }
+          80% { 
+            transform: translateY(-80vh) scale(0.9) rotate(3deg); 
+            opacity: 0.4; 
+          }
+          100% { 
+            transform: translateY(-105vh) scale(0.7) rotate(0deg); 
+            opacity: 0; 
+          }
         }
-        .animate-float-up {
-          animation: float-up 5s ease-out forwards;
+        .animate-float-full {
+          animation: float-full 7s ease-out forwards;
         }
       `}</style>
     </div>
@@ -66,144 +100,54 @@ const FloatingEmoji = ({ feedbackType }) => {
 };
 
 // --- Voice Input for Regular Input Fields ---
-const VoiceInput = ({ placeholder, type = 'text', className }) => {
-  const [text, setText] = useState('');
+const VoiceInput = ({ placeholder, type = 'text', className, value, onChange }) => {
+  const [localText, setLocalText] = useState(value || '');
   const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
+  const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setIsSupported(false);
-      return;
-    }
+    if (SpeechRecognition) {
+      setIsSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'mn-MN';
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'mn-MN';
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const newText = localText + ' ' + transcript;
+        setLocalText(newText.trim());
+        if (onChange) onChange({ target: { value: newText.trim() } });
+      };
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setText(prev => prev + transcript);
-    };
-
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
-
-    recognitionRef.current = recognition;
-
-    return () => {
-      if (recognitionRef.current) recognitionRef.current.stop();
-    };
-  }, []);
-
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (e) {}
-    }
-  };
-
-  return (
-    <div className="relative">
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        className={`${className} pr-12`}
-      />
-      {isSupported && (
-        <button
-          type="button"
-          onClick={toggleListening}
-          className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
-            isListening 
-              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-          }`}
-        >
-          {isListening ? <MicOff size={14} /> : <Mic size={14} />}
-        </button>
-      )}
-    </div>
-  );
-};
-
-// --- Voice Input Textarea Component ---
-const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
-  const [text, setText] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isSupported, setIsSupported] = useState(true);
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    // Check if Speech Recognition is supported
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setIsSupported(false);
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'mn-MN'; // Mongolian, fallback to en-US
-
-    recognition.onresult = (event) => {
-      let finalTranscript = '';
+      recognition.onerror = (e) => {
+        console.log('Speech error:', e.error);
+        setIsListening(false);
+      };
       
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        }
-      }
-      
-      if (finalTranscript) {
-        setText(prev => prev + finalTranscript + ' ');
-      }
-    };
+      recognition.onend = () => setIsListening(false);
 
-    recognition.onerror = (event) => {
-      console.log('Speech recognition error:', event.error);
-      if (event.error === 'not-allowed') {
-        setIsSupported(false);
-      }
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      if (isListening) {
-        // Restart if still listening
-        try {
-          recognition.start();
-        } catch (e) {
-          setIsListening(false);
-        }
-      }
-    };
-
-    recognitionRef.current = recognition;
+      recognitionRef.current = recognition;
+    }
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try { recognitionRef.current.stop(); } catch(e) {}
       }
     };
-  }, [isListening]);
+  }, [localText, onChange]);
 
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-
+  const toggleListening = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!recognitionRef.current) {
+      alert('Таны browser дуу хүлээн авах боломжгүй байна');
+      return;
+    }
+    
     if (isListening) {
       recognitionRef.current.stop();
       setIsListening(false);
@@ -212,9 +156,130 @@ const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
         recognitionRef.current.start();
         setIsListening(true);
       } catch (e) {
-        console.log('Failed to start recognition:', e);
+        console.log('Start error:', e);
+        // Already started, stop and restart
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          try {
+            recognitionRef.current.start();
+            setIsListening(true);
+          } catch(e2) {}
+        }, 100);
       }
     }
+  };
+
+  const handleChange = (e) => {
+    setLocalText(e.target.value);
+    if (onChange) onChange(e);
+  };
+
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={localText}
+        onChange={handleChange}
+        className={`${className} pr-12`}
+      />
+      {isSupported && (
+        <button
+          type="button"
+          onClick={toggleListening}
+          className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+            isListening 
+              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+        </button>
+      )}
+    </div>
+  );
+};
+
+// --- Voice Input Textarea Component ---
+const VoiceTextarea = ({ placeholder, rows = 4, className, value, onChange }) => {
+  const [localText, setLocalText] = useState(value || '');
+  const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'mn-MN';
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            transcript += event.results[i][0].transcript + ' ';
+          }
+        }
+        if (transcript) {
+          const newText = localText + transcript;
+          setLocalText(newText);
+          if (onChange) onChange({ target: { value: newText } });
+        }
+      };
+
+      recognition.onerror = (e) => {
+        console.log('Speech error:', e.error);
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.stop(); } catch(e) {}
+      }
+    };
+  }, [localText, onChange]);
+
+  const toggleListening = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!recognitionRef.current) {
+      alert('Таны browser дуу хүлээн авах боломжгүй байна');
+      return;
+    }
+    
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          try {
+            recognitionRef.current.start();
+            setIsListening(true);
+          } catch(e2) {}
+        }, 100);
+      }
+    }
+  };
+
+  const handleChange = (e) => {
+    setLocalText(e.target.value);
+    if (onChange) onChange(e);
   };
 
   return (
@@ -222,8 +287,8 @@ const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
       <textarea
         rows={rows}
         placeholder={placeholder}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
+        value={localText}
+        onChange={handleChange}
         className={`${className} pr-14`}
       />
       {isSupported && (
@@ -233,7 +298,7 @@ const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
           className={`absolute right-3 top-3 p-2 rounded-xl transition-all ${
             isListening 
               ? 'bg-red-500 text-white shadow-lg animate-pulse' 
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800'
           }`}
         >
           {isListening ? <MicOff size={18} /> : <Mic size={18} />}
