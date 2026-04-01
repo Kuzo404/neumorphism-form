@@ -1,5 +1,183 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check } from 'lucide-react';
+import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check, Mic, MicOff } from 'lucide-react';
+
+// --- Floating Emoji Component ---
+const FloatingEmoji = ({ feedbackType }) => {
+  const [emojis, setEmojis] = useState([]);
+
+  useEffect(() => {
+    // Emoji тохиргоо
+    const emojiMap = {
+      'Хүсэлт': '✉️',
+      'Талархал': '😊',
+      'Гомдол': '😢'
+    };
+    
+    const emoji = emojiMap[feedbackType] || '✉️';
+    
+    // Шинэ emoji үүсгэх
+    const interval = setInterval(() => {
+      const id = Date.now();
+      const left = Math.random() * 80 + 10; // 10% - 90%
+      setEmojis(prev => [...prev.slice(-8), { id, emoji, left }]);
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, [feedbackType]);
+
+  // Emoji устгах
+  useEffect(() => {
+    const cleanup = setInterval(() => {
+      setEmojis(prev => prev.filter(e => Date.now() - e.id < 4000));
+    }, 500);
+    return () => clearInterval(cleanup);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {emojis.map(({ id, emoji, left }) => (
+        <div
+          key={id}
+          className="absolute text-2xl animate-float-up opacity-70"
+          style={{ 
+            left: `${left}%`, 
+            bottom: '-10%',
+            animationDuration: '4s'
+          }}
+        >
+          {emoji}
+        </div>
+      ))}
+      <style>{`
+        @keyframes float-up {
+          0% { transform: translateY(0) scale(0.5); opacity: 0; }
+          10% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+          90% { opacity: 0.6; }
+          100% { transform: translateY(-400px) scale(0.8); opacity: 0; }
+        }
+        .animate-float-up {
+          animation: float-up 4s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// --- Voice Input Textarea Component ---
+const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
+  const [text, setText] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    // Check if Speech Recognition is supported
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setIsSupported(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'mn-MN'; // Mongolian, fallback to en-US
+
+    recognition.onresult = (event) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      
+      if (finalTranscript) {
+        setText(prev => prev + finalTranscript + ' ');
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.log('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        setIsSupported(false);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      if (isListening) {
+        // Restart if still listening
+        try {
+          recognition.start();
+        } catch (e) {
+          setIsListening(false);
+        }
+      }
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [isListening]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {
+        console.log('Failed to start recognition:', e);
+      }
+    }
+  };
+
+  return (
+    <div className="relative">
+      <textarea
+        rows={rows}
+        placeholder={placeholder}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className={`${className} pr-14`}
+      />
+      {isSupported && (
+        <button
+          type="button"
+          onClick={toggleListening}
+          className={`absolute right-3 top-3 p-2 rounded-xl transition-all ${
+            isListening 
+              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+          }`}
+        >
+          {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+        </button>
+      )}
+      {isListening && (
+        <div className="absolute right-3 bottom-3 flex gap-1">
+          <span className="w-1 h-3 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
+          <span className="w-1 h-4 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
+          <span className="w-1 h-2 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+          <span className="w-1 h-5 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '450ms' }} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 // --- 6 Different Realistic Character Styles with Mood Support ---
 const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
@@ -972,7 +1150,7 @@ export default function App() {
                       </>
                     ) : (
                       <>
-                        <div><label className={styles.textLabel}>Мэдээлэл <span className="text-red-500">*</span></label><textarea rows="4" placeholder="Үйл ажиллагааны чиглэл..." className={`${styles.inputBase} resize-none`}></textarea></div>
+                        <div><label className={styles.textLabel}>Мэдээлэл <span className="text-red-500">*</span></label><VoiceTextarea rows={4} placeholder="Үйл ажиллагааны чиглэл..." className={`${styles.inputBase} resize-none`} /></div>
                         <div><label className={styles.textLabel}>Файл</label><div className={`w-full h-24 ${styles.sunken} rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition-colors cursor-pointer border-dashed border-2 border-transparent hover:border-gray-300`}><Upload size={20} className="text-gray-500 mb-2" /><p className="text-[10px] text-gray-500 font-bold uppercase">Файл оруулах</p></div></div>
                       </>
                     )}
@@ -992,7 +1170,10 @@ export default function App() {
 
               {/* STEP 2 */}
               {step === 2 && (
-                <div className="animate-fadeIn">
+                <div className="animate-fadeIn relative">
+                  {/* Floating Emoji Background */}
+                  <FloatingEmoji feedbackType={feedbackType} />
+                  
                   {/* Сонгосон Character - Step 1-тэй яг ижил хэмжээ, bg-гүй, нүд хөдөлдөг */}
                   <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
                   
@@ -1006,7 +1187,7 @@ export default function App() {
                         </div>
                     </div>
                     <div className="relative z-20"><label className={styles.textLabel}>Хэнд илгээх <span className="text-red-500">*</span></label><CustomSelect options={recipients} value={recipient} onChange={setRecipient} placeholder="Албан тушаалтан..." /></div>
-                    <div><label className={styles.textLabel}>Дэлгэрэнгүй <span className="text-red-500">*</span></label><textarea rows="4" placeholder="Санал хүсэлтээ энд бичнэ үү..." className={`${styles.inputBase} resize-none`}></textarea></div>
+                    <div><label className={styles.textLabel}>Дэлгэрэнгүй <span className="text-red-500">*</span></label><VoiceTextarea rows={4} placeholder="Санал хүсэлтээ энд бичнэ үү..." className={`${styles.inputBase} resize-none`} /></div>
                     
                     {/* RATING SECTION */}
                     <div className="grid grid-cols-1 gap-6">
