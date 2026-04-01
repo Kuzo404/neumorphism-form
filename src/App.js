@@ -47,14 +47,14 @@ const FloatingEmoji = ({ feedbackType }) => {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute left-0 right-0 bottom-0 h-[500px] overflow-hidden pointer-events-none z-0">
       {emojis.map(({ id, left }) => (
         <div
           key={id}
           className="absolute animate-float-full opacity-60"
           style={{ 
             left: `${left}%`, 
-            bottom: '-50px',
+            bottom: '0px',
           }}
         >
           {getEmoji()}
@@ -73,7 +73,7 @@ const FloatingEmoji = ({ feedbackType }) => {
             opacity: 0.5; 
           }
           100% { 
-            transform: translateY(-110vh) scale(0.8); 
+            transform: translateY(-500px) scale(0.8); 
             opacity: 0; 
           }
         }
@@ -1077,18 +1077,12 @@ export default function App() {
               {/* STEP 2 */}
               {step === 2 && (
                 <div className="animate-fadeIn relative">
-                  {/* Сонгосон Character with Floating Emoji behind */}
-                  <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-0">
-                    {/* Floating Emoji - Character-ийн ардаар */}
-                    <div className="absolute inset-0 flex justify-center">
-                      <div className="relative w-32 h-40">
-                        <FloatingEmoji feedbackType={feedbackType} />
-                      </div>
-                    </div>
-                    {/* Character - дээр нь */}
-                    <div className="relative z-10">
-                      <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
-                    </div>
+                  {/* Floating Emoji - Төрөл сонгох-оос дээшээ хөвнө */}
+                  <FloatingEmoji feedbackType={feedbackType} />
+                  
+                  {/* Сонгосон Character */}
+                  <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-0 z-10">
+                    <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
                   </div>
                   
                   <div className="space-y-6">
