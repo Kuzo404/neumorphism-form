@@ -28,7 +28,7 @@ const FloatingEmoji = ({ feedbackType }) => {
   // Emoji устгах
   useEffect(() => {
     const cleanup = setInterval(() => {
-      setEmojis(prev => prev.filter(e => Date.now() - e.id < 4000));
+      setEmojis(prev => prev.filter(e => Date.now() - e.id < 5500));
     }, 500);
     return () => clearInterval(cleanup);
   }, []);
@@ -50,13 +50,15 @@ const FloatingEmoji = ({ feedbackType }) => {
       ))}
       <style>{`
         @keyframes float-up {
-          0% { transform: translateY(0) scale(0.5); opacity: 0; }
-          10% { opacity: 0.8; transform: translateY(-20px) scale(1); }
-          90% { opacity: 0.6; }
-          100% { transform: translateY(-400px) scale(0.8); opacity: 0; }
+          0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+          10% { opacity: 1; transform: translateY(-30px) scale(1) rotate(5deg); }
+          30% { transform: translateY(-100px) scale(1.1) rotate(-5deg); opacity: 0.9; }
+          50% { transform: translateY(-200px) scale(1) rotate(5deg); opacity: 0.8; }
+          70% { transform: translateY(-300px) scale(0.9) rotate(-3deg); opacity: 0.6; }
+          100% { transform: translateY(-500px) scale(0.7) rotate(0deg); opacity: 0; }
         }
         .animate-float-up {
-          animation: float-up 4s ease-out forwards;
+          animation: float-up 5s ease-out forwards;
         }
       `}</style>
     </div>
@@ -85,14 +87,11 @@ const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
 
     recognition.onresult = (event) => {
       let finalTranscript = '';
-      let interimTranscript = '';
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
           finalTranscript += transcript;
-        } else {
-          interimTranscript += transcript;
         }
       }
       
