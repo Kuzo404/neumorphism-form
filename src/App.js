@@ -65,6 +65,79 @@ const FloatingEmoji = ({ feedbackType }) => {
   );
 };
 
+// --- Voice Input for Regular Input Fields ---
+const VoiceInput = ({ placeholder, type = 'text', className }) => {
+  const [text, setText] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setIsSupported(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'mn-MN';
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setText(prev => prev + transcript);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.stop();
+    };
+  }, []);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (e) {}
+    }
+  };
+
+  return (
+    <div className="relative">
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className={`${className} pr-12`}
+      />
+      {isSupported && (
+        <button
+          type="button"
+          onClick={toggleListening}
+          className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+            isListening 
+              ? 'bg-red-500 text-white shadow-lg animate-pulse' 
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+          }`}
+        >
+          {isListening ? <MicOff size={14} /> : <Mic size={14} />}
+        </button>
+      )}
+    </div>
+  );
+};
+
 // --- Voice Input Textarea Component ---
 const VoiceTextarea = ({ placeholder, rows = 4, className }) => {
   const [text, setText] = useState('');
@@ -1143,8 +1216,8 @@ export default function App() {
                   <div className="space-y-6">
                     {activeTab === 'person' ? (
                       <>
-                        <div><label className={styles.textLabel}>Нэр <span className="text-red-500">*</span></label><input type="text" placeholder="Болд" className={styles.inputBase} /></div>
-                        <div><label className={styles.textLabel}>Утас <span className="text-red-500">*</span></label><input type="tel" placeholder="9911xxxx" className={styles.inputBase} /></div>
+                        <div><label className={styles.textLabel}>Нэр <span className="text-red-500">*</span></label><VoiceInput type="text" placeholder="Болд" className={styles.inputBase} /></div>
+                        <div><label className={styles.textLabel}>Утас <span className="text-red-500">*</span></label><VoiceInput type="tel" placeholder="9911xxxx" className={styles.inputBase} /></div>
                         <div className="relative z-20"><label className={styles.textLabel}>Салбар <span className="text-red-500">*</span></label><CustomSelect options={branches} value={branch} onChange={setBranch} placeholder="Салбараа сонгоно уу" /></div>
                       </>
                     ) : (
@@ -1170,11 +1243,19 @@ export default function App() {
               {/* STEP 2 */}
               {step === 2 && (
                 <div className="animate-fadeIn relative">
-                  {/* Floating Emoji Background */}
-                  <FloatingEmoji feedbackType={feedbackType} />
-                  
-                  {/* Сонгосон Character - Step 1-тэй яг ижил хэмжээ, bg-гүй, нүд хөдөлдөг */}
-                  <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
+                  {/* Сонгосон Character with Floating Emoji behind */}
+                  <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-0">
+                    {/* Floating Emoji - Character-ийн ардаар */}
+                    <div className="absolute inset-0 flex justify-center">
+                      <div className="relative w-32 h-40">
+                        <FloatingEmoji feedbackType={feedbackType} />
+                      </div>
+                    </div>
+                    {/* Character - дээр нь */}
+                    <div className="relative z-10">
+                      <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
+                    </div>
+                  </div>
                   
                   <div className="space-y-6">
                     <div>
@@ -1219,7 +1300,7 @@ export default function App() {
                           ))}
                         </div>
                       </div>
-                      <div><label className={styles.textLabel}>Ажилтны нэр</label><input type="text" placeholder="Заавал биш..." className={styles.inputBase} /></div>
+                      <div><label className={styles.textLabel}>Ажилтны нэр</label><VoiceInput type="text" placeholder="Заавал биш..." className={styles.inputBase} /></div>
                     </div>
 
                     <div className="pt-4 flex gap-3">
