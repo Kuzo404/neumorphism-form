@@ -6,8 +6,8 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
   // Mood-based expression helpers
   const getMouthPath = (baseY, type) => {
     if (mood === 'Гомдол') {
-      // Гунигтай - доошоо муруй
-      return `M 88 ${baseY + 5} Q 100 ${baseY - 5} 112 ${baseY + 5}`;
+      // Уурласан - доошоо муруй, бага зэрэг нээлттэй
+      return `M 85 ${baseY + 2} Q 100 ${baseY - 8} 115 ${baseY + 2}`;
     } else if (mood === 'Талархал') {
       // Баяртай - том инээмсэглэл
       return `M 82 ${baseY - 5} Q 100 ${baseY + 15} 118 ${baseY - 5}`;
@@ -19,7 +19,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
 
   const getEyeStyle = () => {
     if (mood === 'Гомдол') {
-      return { eyeHeight: 10, pupilSize: 4, eyebrowAngle: 'sad' };
+      return { eyeHeight: 10, pupilSize: 5, eyebrowAngle: 'angry' };
     } else if (mood === 'Талархал') {
       return { eyeHeight: 8, pupilSize: 5, eyebrowAngle: 'happy', closed: true };
     } else {
@@ -29,7 +29,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
 
   const eyeStyle = getEyeStyle();
   const isHappy = mood === 'Талархал';
-  const isSad = mood === 'Гомдол';
+  const isAngry = mood === 'Гомдол';
 
   const characterStyles = {
     1: ( // Эрэгтэй - Business Professional (костюмтай)
@@ -43,10 +43,11 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <ellipse cx="55" cy="85" rx="8" ry="12" fill="#E8C39E" />
         <ellipse cx="145" cy="85" rx="8" ry="12" fill="#E8C39E" />
         {/* Хөмсөг - mood-д суурилсан */}
-        {isSad ? (
+        {isAngry ? (
           <>
-            <path d="M 70 63 Q 80 68 90 65" stroke="#2C1810" strokeWidth="3" fill="none" />
-            <path d="M 110 65 Q 120 68 130 63" stroke="#2C1810" strokeWidth="3" fill="none" />
+            {/* Уурласан хөмсөг - дотогшоо чиглэсэн */}
+            <path d="M 70 68 Q 80 62 90 66" stroke="#2C1810" strokeWidth="3" fill="none" />
+            <path d="M 110 66 Q 120 62 130 68" stroke="#2C1810" strokeWidth="3" fill="none" />
           </>
         ) : (
           <>
@@ -70,11 +71,17 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Нулимс - гомдолд */}
-        {isSad && (
+        {/* Уурын тэмдэг - гомдолд */}
+        {isAngry && (
           <>
-            <ellipse cx="72" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="128" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            {/* Духан дээрх уурын судас */}
+            <g className="animate-pulse">
+              <path d="M 140 55 L 145 60 M 145 55 L 140 60" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+              <path d="M 142 57 L 147 62 M 147 57 L 142 62" stroke="#E53E3E" strokeWidth="1.5" strokeLinecap="round" />
+            </g>
+            {/* Хацар улайсан */}
+            <ellipse cx="65" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
+            <ellipse cx="135" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
           </>
         )}
         {/* Хамар */}
@@ -111,10 +118,11 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <ellipse cx="58" cy="85" rx="6" ry="10" fill="#FFDAB9" />
         <ellipse cx="142" cy="85" rx="6" ry="10" fill="#FFDAB9" />
         {/* Хөмсөг */}
-        {isSad ? (
+        {isAngry ? (
           <>
-            <path d="M 72 66 Q 80 70 88 68" stroke="#5D4037" strokeWidth="2" fill="none" />
-            <path d="M 112 68 Q 120 70 128 66" stroke="#5D4037" strokeWidth="2" fill="none" />
+            {/* Уурласан хөмсөг - дотогшоо чиглэсэн */}
+            <path d="M 72 70 Q 80 64 88 68" stroke="#5D4037" strokeWidth="2" fill="none" />
+            <path d="M 112 68 Q 120 64 128 70" stroke="#5D4037" strokeWidth="2" fill="none" />
           </>
         ) : (
           <>
@@ -138,11 +146,14 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Нулимс */}
-        {isSad && (
+        {/* Уурын тэмдэг */}
+        {isAngry && (
           <>
-            <ellipse cx="72" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="128" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            <g className="animate-pulse">
+              <path d="M 140 55 L 145 60 M 145 55 L 140 60" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+            </g>
+            <ellipse cx="65" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
+            <ellipse cx="135" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
           </>
         )}
         {/* Сормуус */}
@@ -156,7 +167,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <ellipse cx="100" cy="115" rx="14" ry="7" fill="#E57373" />
             <path d="M 86 115 Q 100 108 114 115" stroke="#D32F2F" strokeWidth="1" fill="none" />
           </>
-        ) : isSad ? (
+        ) : isAngry ? (
           <path d="M 88 118 Q 100 110 112 118" stroke="#C4846C" strokeWidth="2.5" fill="none" strokeLinecap="round" />
         ) : (
           <>
@@ -207,18 +218,22 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.4} cy={78 + eyePosition.y * 0.4} r="1.5" fill="white" />
           </>
         )}
-        {/* Нулимс */}
-        {isSad && (
+        {/* Уурын тэмдэг */}
+        {isAngry && (
           <>
-            <ellipse cx="72" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="128" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            <g className="animate-pulse">
+              <path d="M 140 58 L 145 63 M 145 58 L 140 63" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+            </g>
+            <ellipse cx="65" cy="98" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
+            <ellipse cx="135" cy="98" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
         {/* Хөмсөг */}
-        {isSad ? (
+        {isAngry ? (
           <>
-            <path d="M 68 63 Q 80 67 92 65" stroke="#1a1a1a" strokeWidth="2" fill="none" />
-            <path d="M 108 65 Q 120 67 132 63" stroke="#1a1a1a" strokeWidth="2" fill="none" />
+            {/* Уурласан хөмсөг */}
+            <path d="M 68 67 Q 80 62 92 65" stroke="#1a1a1a" strokeWidth="2" fill="none" />
+            <path d="M 108 65 Q 120 62 132 67" stroke="#1a1a1a" strokeWidth="2" fill="none" />
           </>
         ) : (
           <>
@@ -265,10 +280,11 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <circle cx="60" cy="92" r="3" fill="#FF69B4" />
         <circle cx="140" cy="92" r="3" fill="#FF69B4" />
         {/* Хөмсөг */}
-        {isSad ? (
+        {isAngry ? (
           <>
-            <path d="M 73 66 Q 82 70 91 68" stroke="#4A2C2A" strokeWidth="2" fill="none" />
-            <path d="M 109 68 Q 118 70 127 66" stroke="#4A2C2A" strokeWidth="2" fill="none" />
+            {/* Уурласан хөмсөг */}
+            <path d="M 73 70 Q 82 65 91 68" stroke="#4A2C2A" strokeWidth="2" fill="none" />
+            <path d="M 109 68 Q 118 65 127 70" stroke="#4A2C2A" strokeWidth="2" fill="none" />
           </>
         ) : (
           <>
@@ -292,11 +308,12 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={116 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2.5" fill="white" />
           </>
         )}
-        {/* Нулимс */}
-        {isSad && (
+        {/* Уурын тэмдэг */}
+        {isAngry && (
           <>
-            <ellipse cx="72" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="128" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            <g className="animate-pulse">
+              <path d="M 137 58 L 142 63 M 142 58 L 137 63" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+            </g>
           </>
         )}
         {/* Сормуус */}
@@ -313,7 +330,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 82 108 Q 100 128 118 108" stroke="#E57373" strokeWidth="3" fill="#FFE4E1" strokeLinecap="round" />
             <path d="M 88 112 Q 100 120 112 112" fill="#FFF" />
           </>
-        ) : isSad ? (
+        ) : isAngry ? (
           <path d="M 85 115 Q 100 105 115 115" stroke="#E57373" strokeWidth="3" fill="none" strokeLinecap="round" />
         ) : (
           <>
@@ -347,10 +364,11 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <circle cx="62" cy="95" r="4" fill="#FFD700" />
         <circle cx="138" cy="95" r="4" fill="#FFD700" />
         {/* Хөмсөг */}
-        {isSad ? (
+        {isAngry ? (
           <>
-            <path d="M 75 66 Q 83 70 91 68" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
-            <path d="M 109 68 Q 117 70 125 66" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
+            {/* Уурласан хөмсөг */}
+            <path d="M 75 68 Q 83 63 91 66" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
+            <path d="M 109 66 Q 117 63 125 68" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
           </>
         ) : (
           <>
@@ -374,11 +392,14 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={115 + eyePosition.x * 0.5} cy={76 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Нулимс */}
-        {isSad && (
+        {/* Уурын тэмдэг */}
+        {isAngry && (
           <>
-            <ellipse cx="75" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="125" cy="92" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            <g className="animate-pulse">
+              <path d="M 140 62 L 145 67 M 145 62 L 140 67" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+            </g>
+            <ellipse cx="75" cy="92" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
+            <ellipse cx="125" cy="92" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
         {/* Сормуус */}
@@ -389,7 +410,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         {/* Уруул */}
         {isHappy ? (
           <ellipse cx="100" cy="108" rx="12" ry="7" fill="#EC407A" />
-        ) : isSad ? (
+        ) : isAngry ? (
           <path d="M 88 112 Q 100 105 112 112" stroke="#EC407A" strokeWidth="2" fill="none" strokeLinecap="round" />
         ) : (
           <ellipse cx="100" cy="108" rx="10" ry="5" fill="#EC407A" />
@@ -420,7 +441,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <ellipse cx="58" cy="85" rx="7" ry="11" fill="#DEB887" />
         <ellipse cx="142" cy="85" rx="7" ry="11" fill="#DEB887" />
         {/* Хөмсөг */}
-        {isSad ? (
+        {isAngry ? (
           <>
             <path d="M 70 66 Q 80 70 90 68" stroke="#3E2723" strokeWidth="2.5" fill="none" />
             <path d="M 110 68 Q 120 70 130 66" stroke="#3E2723" strokeWidth="2.5" fill="none" />
@@ -447,11 +468,14 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Нулимс */}
-        {isSad && (
+        {/* Уурын тэмдэг */}
+        {isAngry && (
           <>
-            <ellipse cx="72" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
-            <ellipse cx="128" cy="95" rx="3" ry="5" fill="#87CEEB" opacity="0.7" className="animate-pulse" />
+            <g className="animate-pulse">
+              <path d="M 140 60 L 145 65 M 145 60 L 140 65" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
+            </g>
+            <ellipse cx="72" cy="95" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
+            <ellipse cx="128" cy="95" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
         {/* Хамар */}
@@ -675,7 +699,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('person'); 
   const [step, setStep] = useState(1); 
   const [rating, setRating] = useState(0);
-  const [feedbackType, setFeedbackType] = useState('request'); 
+  const [feedbackType, setFeedbackType] = useState('Хүсэлт'); 
   const [branch, setBranch] = useState('');
   const [recipient, setRecipient] = useState('');
   
@@ -683,7 +707,8 @@ export default function App() {
   const [selectedAvatar, setSelectedAvatar] = useState(1);
   
   // --- SCALING LOGIC ---
-  const [scale, setScale] = useState(1);
+  // eslint-disable-next-line no-unused-vars
+  const [_scale, setScale] = useState(1);
   const contentRef = useRef(null);
 
   // --- FIREWORKS STATE ---
@@ -789,20 +814,7 @@ export default function App() {
     textLabel: 'text-[11px] font-bold mb-2 ml-2 text-gray-600 tracking-widest uppercase',
   };
 
-  const Header = ({ title, showBack }) => (
-    <div className="relative flex items-center justify-center mb-8 w-full h-10">
-      {showBack && (
-        <div className="absolute left-0 top-0 bottom-0 flex items-center z-20">
-          <button onClick={() => setStep(1)} className={`w-10 h-10 rounded-xl ${styles.raised} flex items-center justify-center text-gray-600 hover:text-gray-900 active:scale-95 transition-all`}>
-            <ArrowLeft size={20} />
-          </button>
-        </div>
-      )}
-      <h2 className="text-xl font-extrabold text-gray-800 tracking-wider uppercase text-center drop-shadow-sm opacity-80 whitespace-nowrap z-10">
-        {title}
-      </h2>
-    </div>
-  );
+  // Header component removed - no longer used
 
   return (
     <>
@@ -988,7 +1000,7 @@ export default function App() {
                     <div>
                         <label className={`${styles.textLabel} text-center block mb-4`}>Төрөл сонгох <span className="text-red-500">*</span></label>
                         <div className="grid grid-cols-3 gap-4">
-                          {['Гомдол', 'Хүсэлт', 'Талархал'].map((type) => (
+                          {['Хүсэлт', 'Талархал', 'Гомдол'].map((type) => (
                             <button key={type} onClick={() => setFeedbackType(type)} className={`py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-wide ${feedbackType === type ? styles.primaryButton : `${styles.raised} text-gray-500 hover:text-gray-800`}`}>{type}</button>
                           ))}
                         </div>
