@@ -47,7 +47,7 @@ const FloatingEmoji = ({ feedbackType }) => {
   };
 
   return (
-    <div className="absolute left-0 right-0 bottom-0 h-[500px] overflow-hidden pointer-events-none z-0">
+    <div className="absolute left-0 right-0 top-auto bottom-[100%] h-[600px] overflow-visible pointer-events-none z-0">
       {emojis.map(({ id, left }) => (
         <div
           key={id}
@@ -73,7 +73,7 @@ const FloatingEmoji = ({ feedbackType }) => {
             opacity: 0.5; 
           }
           100% { 
-            transform: translateY(-500px) scale(0.8); 
+            transform: translateY(-600px) scale(0.8); 
             opacity: 0; 
           }
         }
@@ -1077,16 +1077,15 @@ export default function App() {
               {/* STEP 2 */}
               {step === 2 && (
                 <div className="animate-fadeIn relative">
-                  {/* Floating Emoji - Төрөл сонгох-оос дээшээ хөвнө */}
-                  <FloatingEmoji feedbackType={feedbackType} />
-                  
                   {/* Сонгосон Character */}
                   <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-0 z-10">
                     <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
                   </div>
                   
                   <div className="space-y-6">
-                    <div>
+                    <div className="relative">
+                        {/* Floating Emoji - Төрөл сонгох-оос дээшээ хөвнө */}
+                        <FloatingEmoji feedbackType={feedbackType} />
                         <label className={`${styles.textLabel} text-center block mb-4`}>Төрөл сонгох <span className="text-red-500">*</span></label>
                         <div className="grid grid-cols-3 gap-4">
                           {['Хүсэлт', 'Талархал', 'Гомдол'].map((type) => (
