@@ -1178,7 +1178,7 @@ export default function App() {
       active:scale-[0.98] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.4)]
       transition-all duration-300
     `,
-    inputBase: 'font-poppins w-full bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5 rounded-2xl px-4 py-4 outline-none text-gray-800 placeholder-gray-500 text-sm font-semibold tracking-wide transition-all focus:bg-white/60',
+    inputBase: 'font-poppins w-full bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5 rounded-2xl px-4 py-4 outline-none text-gray-800 placeholder-gray-500 text-base font-semibold tracking-wide transition-all focus:bg-white/60',
     textLabel: 'font-poppins text-[11px] font-bold mb-2 ml-2 text-gray-600 tracking-widest uppercase',
   };
 
