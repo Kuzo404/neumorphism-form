@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, Star, Upload, User, ArrowLeft, Send, Check } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronDown, Upload, Check } from 'lucide-react';
 
 // --- Floating Emoji Component ---
+// eslint-disable-next-line no-unused-vars
 const FloatingEmoji = ({ feedbackType }) => {
   const [emojis, setEmojis] = useState([]);
 
@@ -717,6 +718,7 @@ const EyeTracker = ({ selectedAvatar, mood = 'neutral' }) => {
     </div>
   );
 };
+// eslint-disable-next-line no-unused-vars
 const CustomSelect = ({ options, value, onChange, placeholder, icon: Icon }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -784,7 +786,7 @@ export default function App() {
   const [step, setStep] = useState(1); 
   const [rating, setRating] = useState(0);
   const [feedbackType, setFeedbackType] = useState('Хүсэлт'); 
-  const [branch, setBranch] = useState('');
+  const [branch, setBranch] = useState(''); // eslint-disable-line no-unused-vars
   const [selectedBranch, setSelectedBranch] = useState(0);
   const [wheelAngle, setWheelAngle] = useState(0);
   const [isWheelSnapping, setIsWheelSnapping] = useState(false);
@@ -1074,6 +1076,7 @@ export default function App() {
   };
 
   // --- FIREWORKS STATE ---
+  // eslint-disable-next-line no-unused-vars
   const [explodingStars, setExplodingStars] = useState([]);
   const [isAnimatingStars, setIsAnimatingStars] = useState(false);
 
@@ -1131,6 +1134,7 @@ export default function App() {
   }, []);
 
   // --- STAR CLICK LOGIC ---
+  // eslint-disable-next-line no-unused-vars
   const handleStarClick = async (clickedStar) => {
     if (isAnimatingStars) return;
 
@@ -1161,6 +1165,7 @@ export default function App() {
   const recipients = ['Менежер', 'Салбарын захирал', 'Хүний нөөц', 'Маркетинг алба'];
 
 
+  // eslint-disable-next-line no-unused-vars
   const styles = {
     glassCard: 'bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] relative z-10',
     sunken: 'bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5',
