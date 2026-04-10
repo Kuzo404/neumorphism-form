@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Star, Upload, User, Building, ArrowLeft, Send, Check } from 'lucide-react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronDown, Star, Upload, User, ArrowLeft, Send, Check } from 'lucide-react';
 
 // --- Floating Emoji Component ---
 const FloatingEmoji = ({ feedbackType }) => {
@@ -780,20 +780,298 @@ const CustomSelect = ({ options, value, onChange, placeholder, icon: Icon }) => 
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('person'); 
+  const [activeTab, setActiveTab] = useState('select'); 
   const [step, setStep] = useState(1); 
   const [rating, setRating] = useState(0);
   const [feedbackType, setFeedbackType] = useState('Хүсэлт'); 
   const [branch, setBranch] = useState('');
+  const [selectedBranch, setSelectedBranch] = useState(0);
+  const [wheelAngle, setWheelAngle] = useState(0);
+  const [isWheelSnapping, setIsWheelSnapping] = useState(false);
+  const wheelTouchRef = useRef({ x: null, angle: 0 });
+  const [magnifier, setMagnifier] = useState({ visible: false, idx: null, x: 0, y: 0 });
+  const magnifierTimer = useRef(null);
   const [recipient, setRecipient] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [detail, setDetail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [workerName, setWorkerName] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const fileInputRef = useRef(null);
+  const feedbackSwipeRef = useRef(null);
+  const feedbackTypesOrder = ['Хүсэлт', 'Гомдол', 'Талархал'];
+
+  // Сурталчилгааны өгөгдөл - 3 секунд болгонд солигдоно
+  const [adIndex, setAdIndex] = useState(0);
+  const ads = [
+    { label: 'ББСБ', title: 'Хэрэглээний зээл хялбар нөхцөлөөр', range: '₮500,000 - ₮10,000,000', rate: '2.9', unit: '% /сар', btn: 'ЗЭЭЛ АВАХ', gradient: 'from-[#003080] to-[#0050B0]', accent: 'from-[#00B2E7] to-[#0090C0]', img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=400&fit=crop' },
+    { label: 'ДААТГАЛ', title: 'Эрүүл мэндийн даатгал хямд үнээр', range: '₮50,000 - ₮500,000 /сар', rate: '15', unit: '% хөнгөлөлт', btn: 'БҮРТГҮҮЛЭХ', gradient: 'from-[#2d0080] to-[#5a30b0]', accent: 'from-[#9C27B0] to-[#7B1FA2]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=400&fit=crop' },
+    { label: 'ХАДГАЛАМЖ', title: 'Хугацаатай хадгаламж өндөр хүүтэй', range: '₮1,000,000 - ₮50,000,000', rate: '12.5', unit: '% /жил', btn: 'ДЭЛГЭРЭНГҮЙ', gradient: 'from-[#006040] to-[#008060]', accent: 'from-[#00C853] to-[#009624]', img: 'https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=400&h=400&fit=crop' },
+  ];
+
+  useEffect(() => {
+    if (step !== 2) return;
+    const timer = setInterval(() => setAdIndex(prev => (prev + 1) % ads.length), 3000);
+    return () => clearInterval(timer);
+  }, [step, ads.length]);
+
+  // Видео зар - автоматаар тоглогдоно
+  const [videoAdIndex, setVideoAdIndex] = useState(0);
+  const videoRef = useRef(null);
+  const videoAds = [
+    { src: 'https://www.w3schools.com/html/mov_bbb.mp4', title: 'ББСБ - Хэрэглээний зээл 2.9%' },
+    { src: 'https://www.w3schools.com/html/movie.mp4', title: 'Даатгал - Эрүүл мэндийн даатгал' },
+    { src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm', title: 'Хадгаламж - 12.5% өндөр хүү' },
+  ];
+
+  const handleVideoEnded = () => {
+    setVideoAdIndex(prev => (prev + 1) % videoAds.length);
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.load();
+      videoRef.current.play().catch(() => {});
+    }
+  }, [videoAdIndex]);
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const newFiles = files.map(f => ({
+      file: f,
+      id: Date.now() + Math.random(),
+      name: f.name,
+      size: f.size,
+      type: f.type,
+      preview: f.type.startsWith('image/') ? URL.createObjectURL(f) : null,
+    }));
+    setUploadedFiles(prev => [...prev, ...newFiles]);
+    e.target.value = '';
+  };
+
+  const removeFile = (id) => {
+    setUploadedFiles(prev => {
+      const file = prev.find(f => f.id === id);
+      if (file?.preview) URL.revokeObjectURL(file.preview);
+      return prev.filter(f => f.id !== id);
+    });
+  };
+
+  const getFileIcon = (type) => {
+    if (type.startsWith('image/')) return '🖼️';
+    if (type.startsWith('video/')) return '🎬';
+    if (type.startsWith('audio/')) return '🎵';
+    return '📎';
+  };
+
+  const formatSize = (bytes) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  };
   
   // --- PROFILE AVATAR STATE ---
   const [selectedAvatar, setSelectedAvatar] = useState(1);
+  const [swipeY, setSwipeY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const touchStartY = useRef(null);
+  const dragStartY = useRef(null);
   
   // --- SCALING LOGIC ---
   // eslint-disable-next-line no-unused-vars
   const [_scale, setScale] = useState(1);
   const contentRef = useRef(null);
+
+  const branchImages = [
+    'https://picsum.photos/id/634/200/300',
+    'https://picsum.photos/id/228/200/300',
+    'https://picsum.photos/id/661/200/300',
+    'https://picsum.photos/id/380/200/300',
+    'https://picsum.photos/id/392/200/300',
+    'https://picsum.photos/id/238/200/300',
+    'https://picsum.photos/id/469/200/300',
+    'https://picsum.photos/id/311/200/300',
+    'https://picsum.photos/id/515/200/300',
+    'https://picsum.photos/id/521/200/300',
+    'https://picsum.photos/id/549/200/300',
+    'https://picsum.photos/id/178/200/300',
+    'https://picsum.photos/id/637/200/300',
+    'https://picsum.photos/id/641/200/300',
+    'https://picsum.photos/id/669/200/300',
+    'https://picsum.photos/id/685/200/300',
+  ];
+
+  const handleWheelTouchStart = (e) => {
+    e.stopPropagation();
+    setIsWheelSnapping(false);
+    wheelTouchRef.current = { x: e.touches[0].clientX, angle: wheelAngle };
+  };
+
+  const handleWheelTouchMove = (e) => {
+    if (wheelTouchRef.current.x === null) return;
+    const diff = e.touches[0].clientX - wheelTouchRef.current.x;
+    const total = branches.length;
+    const anglePerCard = 360 / total;
+    const maxDrag = anglePerCard * 1.2;
+    const raw = diff * 0.15;
+    const clamped = Math.max(-maxDrag, Math.min(maxDrag, raw));
+    setWheelAngle(wheelTouchRef.current.angle + clamped);
+  };
+
+  const handleWheelTouchEnd = () => {
+    const total = branches.length;
+    const anglePerCard = 360 / total;
+    const diff = wheelAngle - wheelTouchRef.current.angle;
+    let snapped;
+    if (Math.abs(diff) > anglePerCard * 0.2) {
+      const dir = diff > 0 ? 1 : -1;
+      snapped = wheelTouchRef.current.angle + dir * anglePerCard;
+    } else {
+      snapped = wheelTouchRef.current.angle;
+    }
+    setIsWheelSnapping(true);
+    setWheelAngle(snapped);
+    const rawIdx = Math.round(-snapped / anglePerCard);
+    const idx = ((rawIdx % total) + total) % total;
+    setSelectedBranch(idx);
+    setBranch(branches[idx]);
+    wheelTouchRef.current.x = null;
+  };
+
+  // Desktop: mouse drag for branch wheel
+  const wheelMouseRef = useRef({ x: null, angle: 0, dragging: false });
+
+  const handleWheelMouseDown = (e) => {
+    e.preventDefault();
+    setIsWheelSnapping(false);
+    wheelMouseRef.current = { x: e.clientX, angle: wheelAngle, dragging: true };
+  };
+
+  const handleWheelMouseMove = (e) => {
+    if (!wheelMouseRef.current.dragging) return;
+    const diff = e.clientX - wheelMouseRef.current.x;
+    const total = branches.length;
+    const anglePerCard = 360 / total;
+    const maxDrag = anglePerCard * 1.2;
+    const raw = diff * 0.15;
+    const clamped = Math.max(-maxDrag, Math.min(maxDrag, raw));
+    setWheelAngle(wheelMouseRef.current.angle + clamped);
+  };
+
+  const handleWheelMouseUp = () => {
+    if (!wheelMouseRef.current.dragging) return;
+    wheelMouseRef.current.dragging = false;
+    const total = branches.length;
+    const anglePerCard = 360 / total;
+    const diff = wheelAngle - wheelMouseRef.current.angle;
+    let snapped;
+    if (Math.abs(diff) > anglePerCard * 0.2) {
+      const dir = diff > 0 ? 1 : -1;
+      snapped = wheelMouseRef.current.angle + dir * anglePerCard;
+    } else {
+      snapped = wheelMouseRef.current.angle;
+    }
+    setIsWheelSnapping(true);
+    setWheelAngle(snapped);
+    const rawIdx = Math.round(-snapped / anglePerCard);
+    const idx = ((rawIdx % total) + total) % total;
+    setSelectedBranch(idx);
+    setBranch(branches[idx]);
+  };
+
+  // Desktop: mouse scroll wheel for branch wheel
+  const handleWheelScroll = (e) => {
+    e.preventDefault();
+    const total = branches.length;
+    const anglePerCard = 360 / total;
+    const dir = e.deltaY > 0 ? -1 : 1;
+    const newAngle = wheelAngle + dir * anglePerCard;
+    setIsWheelSnapping(true);
+    setWheelAngle(newAngle);
+    const rawIdx = Math.round(-newAngle / anglePerCard);
+    const idx = ((rawIdx % total) + total) % total;
+    setSelectedBranch(idx);
+    setBranch(branches[idx]);
+  };
+
+  // Attach non-passive wheel listener to prevent page scroll
+  const wheelScrollRef = useRef(handleWheelScroll);
+  wheelScrollRef.current = handleWheelScroll;
+  const wheelContainerRefs = useRef(new Set());
+  const wheelRefCallback = useCallback((node) => {
+    if (node && !wheelContainerRefs.current.has(node)) {
+      wheelContainerRefs.current.add(node);
+      node.addEventListener('wheel', (e) => wheelScrollRef.current(e), { passive: false });
+    }
+  }, []);
+
+  const renderBranchWheel = () => {
+    const total = branches.length;
+    const radius = 300;
+    const cardW = 70;
+    const cardH = 105;
+    const viewH = 220;
+    const centerY = viewH + radius - cardH - 20;
+
+    return branches.map((name, i) => {
+      const baseAngle = (i / total) * 360;
+      const currentAngle = baseAngle + wheelAngle;
+      let norm = ((currentAngle % 360) + 360) % 360;
+      const dist = norm > 180 ? 360 - norm : norm;
+      const distNorm = dist / 180;
+
+      const angleRad = (currentAngle * Math.PI) / 180;
+      const x = radius * Math.sin(angleRad);
+      const y = -radius * Math.cos(angleRad);
+
+      const blur = distNorm * 6;
+      const opacity = Math.max(0, 1 - distNorm * 2);
+      const grayscale = Math.min(1, distNorm * 2);
+      const scale = 1 - distNorm * 0.3;
+
+      if (opacity <= 0.05) return null;
+
+      return (
+        <div
+          key={i}
+          className="absolute rounded-xl overflow-hidden shadow-lg bg-[#0055CC]"
+          style={{
+            width: cardW,
+            height: cardH,
+            left: `calc(50% + ${x}px - ${cardW / 2}px)`,
+            top: centerY + y - cardH / 2,
+            filter: `blur(${blur}px) grayscale(${grayscale})`,
+            opacity,
+            transform: `scale(${scale})`,
+            transition: isWheelSnapping ? 'all 0.3s ease-out' : 'none',
+            zIndex: Math.round((1 - distNorm) * 100),
+          }}
+          onTouchStart={(ev) => {
+            magnifierTimer.current = { x: ev.touches[0].clientX, y: ev.touches[0].clientY, idx: i, moved: false };
+          }}
+          onTouchMove={(ev) => {
+            if (!magnifierTimer.current) return;
+            const dx = ev.touches[0].clientX - magnifierTimer.current.x;
+            const dy = ev.touches[0].clientY - magnifierTimer.current.y;
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) magnifierTimer.current.moved = true;
+          }}
+          onTouchEnd={() => {
+            if (magnifierTimer.current && !magnifierTimer.current.moved) {
+              setMagnifier({ visible: true, idx: i, x: 0, y: 0 });
+            }
+            magnifierTimer.current = null;
+          }}
+        >
+          <img
+            src={branchImages[i]}
+            className="w-full h-full object-cover"
+            alt={name}
+            draggable={false}
+          />
+        </div>
+      );
+    });
+  };
 
   // --- FIREWORKS STATE ---
   const [explodingStars, setExplodingStars] = useState([]);
@@ -882,6 +1160,7 @@ export default function App() {
   const branches = Array.from({ length: 16 }, (_, i) => `Салбар ${i + 1}`);
   const recipients = ['Менежер', 'Салбарын захирал', 'Хүний нөөц', 'Маркетинг алба'];
 
+
   const styles = {
     glassCard: 'bg-white/40 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] relative z-10',
     sunken: 'bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5',
@@ -894,19 +1173,80 @@ export default function App() {
       active:scale-[0.98] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.4)]
       transition-all duration-300
     `,
-    inputBase: 'w-full bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5 rounded-2xl px-4 py-4 outline-none text-gray-800 placeholder-gray-500 text-sm font-semibold tracking-wide transition-all focus:bg-white/60',
-    textLabel: 'text-[11px] font-bold mb-2 ml-2 text-gray-600 tracking-widest uppercase',
+    inputBase: 'font-poppins w-full bg-gray-100/50 shadow-[inset_3px_3px_6px_rgba(0,0,0,0.15),inset_-3px_-3px_6px_rgba(255,255,255,0.8)] border border-black/5 rounded-2xl px-4 py-4 outline-none text-gray-800 placeholder-gray-500 text-sm font-semibold tracking-wide transition-all focus:bg-white/60',
+    textLabel: 'font-poppins text-[11px] font-bold mb-2 ml-2 text-gray-600 tracking-widest uppercase',
   };
 
   // Header component removed - no longer used
 
+  // Сурталчилгааны баннер - 3 секунд болгонд солигдоно
+  const renderAdBanner = (extraClass = '') => {
+    const ad = ads[adIndex];
+    return (
+      <div className={`rounded-3xl overflow-hidden bg-gradient-to-br ${ad.gradient} p-4 flex gap-3 transition-all duration-500 ${extraClass}`}>
+        <div className={`w-[40%] flex-shrink-0 rounded-2xl overflow-hidden aspect-square relative`}>
+          <img src={ad.img} alt={ad.label} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <p className="font-opensans text-white text-[22px] font-extrabold leading-none drop-shadow-lg">{ad.rate}</p>
+              <p className="font-poppins text-white text-[8px] font-bold drop-shadow-lg">{ad.unit}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col justify-between py-1 flex-1 min-w-0">
+          <div>
+            <p className="font-montserrat text-white text-[8px] font-black tracking-[0.2em] uppercase">{ad.label}</p>
+            <p className="font-poppins text-white text-[13px] font-bold leading-tight mt-1">{ad.title}</p>
+            <p className="font-poppins text-white text-[10px] mt-1">{ad.range}</p>
+          </div>
+          <button className={`bg-gradient-to-r ${ad.accent} rounded-full px-4 py-1.5 font-opensans text-white text-[9px] font-extrabold tracking-wider self-start mt-2`}>{ad.btn}</button>
+        </div>
+      </div>
+    );
+  };
+
+  // Видео зарын баннер
+  const renderVideoBanner = (extraClass = '') => {
+    const vid = videoAds[videoAdIndex];
+    return (
+      <div className={`rounded-3xl overflow-hidden bg-black relative ${extraClass}`}>
+        <video
+          ref={videoRef}
+          src={vid.src}
+          className="w-full aspect-video object-cover rounded-3xl"
+          autoPlay
+          muted
+          playsInline
+          onEnded={handleVideoEnded}
+        />
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 rounded-b-3xl">
+          <div className="flex items-center justify-between">
+            <p className="font-poppins text-white text-[11px] font-bold">{vid.title}</p>
+            <div className="flex gap-1">
+              {videoAds.map((_, i) => (
+                <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === videoAdIndex ? 'bg-white' : 'bg-white/40'}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* Dots for ad rotation */}
+        <div className="absolute top-2 right-3 flex gap-1">
+          {videoAds.map((_, i) => (
+            <div key={i} className={`w-1 h-1 rounded-full ${i === videoAdIndex ? 'bg-[#00B2E7]' : 'bg-white/30'}`} />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800;900&family=Open+Sans:wght@400;700;800&family=Poppins:wght@400;500;600;700&display=swap');
         body { 
           font-family: 'Poppins', sans-serif; 
-          background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%);
+          background: #0048BA;
           margin: 0;
           padding: 0;
           height: 100vh;
@@ -916,12 +1256,40 @@ export default function App() {
           align-items: center;
           justify-content: center;
         }
+        @media (min-width: 1024px) {
+          body {
+            background: linear-gradient(135deg, #001a4d 0%, #003080 50%, #001a4d 100%);
+          }
+        }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; }
+
+        /* Desktop main scrollbar */
+        @media (min-width: 1024px) {
+          ::-webkit-scrollbar { width: 6px; }
+          ::-webkit-scrollbar-track { background: rgba(0, 72, 186, 0.3); border-radius: 10px; }
+          ::-webkit-scrollbar-thumb { 
+            background: linear-gradient(180deg, #00B2E7, #0060D0); 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.1);
+          }
+          ::-webkit-scrollbar-thumb:hover { 
+            background: linear-gradient(180deg, #33c4ed, #0080f0); 
+          }
+          * { scrollbar-width: thin; scrollbar-color: #00B2E7 rgba(0, 72, 186, 0.3); }
+        }
         .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
         
+        /* Font families */
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+        .font-opensans { font-family: 'Open Sans', sans-serif; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
 
         /* Зургууд үсэрч гарч ирэх анимейшн */
         @keyframes bounceIn {
@@ -945,205 +1313,582 @@ export default function App() {
           border-radius: 50%;
           animation: flyOut 0.8s ease-out forwards;
         }
-      `}</style>
 
-      {/* Decorative Blobs */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-200/40 blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-200/40 blur-[120px] pointer-events-none"></div>
+        /* Vertical snap scroll for avatars */
+        .avatar-vertical-scroll {
+          scroll-snap-type: y mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .avatar-vertical-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        .avatar-snap-item {
+          scroll-snap-align: center;
+        }
+
+        /* Character float animation */
+        @keyframes characterFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+        .animate-character-float {
+          animation: characterFloat 3s ease-in-out infinite;
+        }
+
+        /* Gradient line animation */
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .animate-shimmer {
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+          background-size: 200% 100%;
+          animation: shimmer 3s infinite linear;
+        }
+      `}</style>
 
       <div 
         ref={contentRef}
         className="relative w-screen h-screen overflow-y-auto transition-transform duration-300 ease-out"
       >
         <div className="w-full min-h-full relative z-10">
-          <div className={`w-full min-h-screen ${styles.glassCard} p-6 md:p-12 transition-all duration-500 flex flex-col justify-center`}>
-            
-            <div className="w-full max-w-2xl mx-auto">
-              
-              {/* STEP 1 */}
-              {step === 1 && (
-                <div className="animate-fadeIn">
-                  {/* INTERACTIVE CHARACTER - MOUSE TRACKING */}
+          
+          {/* STEP 1 - Avatar selection (exact match to design) */}
+          {step === 1 && (
+            <div className="w-full h-screen bg-gradient-to-b from-[#1a9fd4] via-[#00B2E7] to-[#B3E5FC] lg:bg-gradient-to-br lg:from-[#0048BA] lg:via-[#0060D0] lg:to-[#00B2E7] flex flex-col items-center animate-fadeIn relative overflow-hidden">
+
+              {/* Title */}
+              <div className="text-center mt-[20vh] lg:mt-[10vh] z-10">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase" style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.2)', letterSpacing: '2px' }}>
+                  АВАТАРАА
+                </h1>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase" style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.2)', letterSpacing: '2px' }}>
+                  СОНГООРОЙ
+                </h1>
+              </div>
+
+              {/* Center - white line, avatar, white line */}
+              <div className="flex-1 flex flex-col items-center justify-center z-10 w-full px-8">
+                {/* Top line */}
+                <div className="w-[65%] max-w-[280px] lg:max-w-[400px] h-[2px] bg-white/80 rounded-full mb-3 sm:mb-6"></div>
+
+                {/* Avatar - swipeable (up/down drag) */}
+                <div 
+                  className="w-[260px] h-[260px] sm:w-[300px] sm:h-[300px] lg:w-[350px] lg:h-[350px] cursor-grab active:cursor-grabbing select-none"
+                  style={{ transform: `translateY(${swipeY}px)`, transition: isDragging ? 'none' : 'transform 0.3s ease-out' }}
+                  onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; setIsDragging(true); }}
+                  onTouchMove={(e) => {
+                    if (touchStartY.current === null) return;
+                    const diff = e.touches[0].clientY - touchStartY.current;
+                    setSwipeY(Math.max(-80, Math.min(80, diff)));
+                  }}
+                  onTouchEnd={() => {
+                    setIsDragging(false);
+                    if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                    else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                    setSwipeY(0);
+                    touchStartY.current = null;
+                  }}
+                  onMouseDown={(e) => { dragStartY.current = e.clientY; setIsDragging(true); e.preventDefault(); }}
+                  onMouseMove={(e) => {
+                    if (dragStartY.current === null || !isDragging) return;
+                    const diff = e.clientY - dragStartY.current;
+                    setSwipeY(Math.max(-80, Math.min(80, diff)));
+                  }}
+                  onMouseUp={() => {
+                    setIsDragging(false);
+                    if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                    else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                    setSwipeY(0);
+                    dragStartY.current = null;
+                  }}
+                  onMouseLeave={() => {
+                    if (isDragging) {
+                      setIsDragging(false);
+                      if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                      else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                      setSwipeY(0);
+                      dragStartY.current = null;
+                    }
+                  }}
+                  onWheel={(e) => {
+                    e.preventDefault();
+                    if (e.deltaY > 0) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                    else setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                  }}
+                >
                   <EyeTracker selectedAvatar={selectedAvatar} />
-
-                  {/* ПРОФАЙЛ ЗУРАГ СОНГОХ ХЭСЭГ */}
-                  <div className="mb-10">
-                    <p className="text-center text-[13px] md:text-sm font-semibold text-gray-700 mb-5 px-2">
-                      Та өөрт тохирох Профайл зурагаа сонгоно уу
-                    </p>
-                    {/* Horizontal scrollable container */}
-                    <div className="relative -mx-6 md:-mx-12">
-                      <div 
-                        className="flex gap-3 sm:gap-5 px-6 md:px-12 overflow-x-auto snap-x snap-mandatory py-4"
-                        style={{ 
-                          scrollbarWidth: 'none', 
-                          msOverflowStyle: 'none',
-                          WebkitOverflowScrolling: 'touch',
-                          overflow: '-moz-scrollbars-none'
-                        }}
-                      >
-                        {/* Scroll padding */}
-                        <div className="flex-shrink-0 w-[calc(50%-40px)] sm:w-0"></div>
-                        {[1, 2, 3, 4, 5, 6].map((num, idx) => {
-                          const isSelected = selectedAvatar === num;
-                          return (
-                            <div 
-                              key={num} 
-                              className="relative animate-bounceIn flex-shrink-0 snap-center"
-                              style={{ animationDelay: `${idx * 80}ms`, opacity: 0 }}
-                            >
-                              <button
-                                onClick={() => setSelectedAvatar(num)}
-                                className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-[20px] sm:rounded-[24px] flex items-center justify-center cursor-pointer transition-all duration-300 border-2
-                                  ${isSelected 
-                                    ? 'border-gray-800 scale-110 shadow-[0_8px_20px_rgba(0,0,0,0.15)] bg-white z-10' 
-                                    : 'border-transparent scale-90 opacity-60 grayscale-[40%] hover:grayscale-0 hover:opacity-100 hover:scale-100 hover:shadow-md bg-white/40'
-                                  }
-                                `}
-                              >
-                                {/* Mini character preview */}
-                                <div className="w-full h-full p-1">
-                                  {renderCharacter(num, { x: 0, y: 0 })}
-                                </div>
-                              </button>
-
-                              {/* Сонгогдсон үед гарч ирэх Check badge */}
-                              {isSelected && (
-                                <div className="absolute -top-2 -right-2 w-6 h-6 bg-gray-800 rounded-full border-2 border-white shadow-lg flex items-center justify-center animate-bounceIn z-20">
-                                  <Check size={14} className="text-white stroke-[3px]" />
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                        {/* Scroll padding */}
-                        <div className="flex-shrink-0 w-[calc(50%-40px)] sm:w-0"></div>
-                      </div>
-                      {/* Scroll indicator dots - mobile only */}
-                      <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
-                        {[1, 2, 3, 4, 5, 6].map((num) => (
-                          <div 
-                            key={num}
-                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                              selectedAvatar === num ? 'bg-gray-800 w-4' : 'bg-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-center text-[13px] md:text-sm font-semibold text-gray-700 mb-4 px-2">
-                    Та Ажилтанд хандах уу, Байгууллагад хандах уу? Доороос сонгоно уу.
-                  </p>
-
-                  {/* Tabs */}
-                  <div className={`w-full h-16 rounded-2xl p-2 mb-8 flex items-center ${styles.sunken}`}>
-                    <button onClick={() => setActiveTab('person')} className={`flex-1 h-full rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'person' ? styles.primaryButton : 'text-gray-500 hover:text-gray-800'}`}>
-                      <User size={16} /> АЖИЛТАН
-                    </button>
-                    <button onClick={() => setActiveTab('org')} className={`flex-1 h-full rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 ${activeTab === 'org' ? styles.primaryButton : 'text-gray-500 hover:text-gray-800'}`}>
-                      <Building size={16} /> БАЙГУУЛЛАГА
-                    </button>
-                  </div>
-
-                  <div className="space-y-6">
-                    {activeTab === 'person' ? (
-                      <>
-                        <div><label className={styles.textLabel}>Нэр <span className="text-red-500">*</span></label><input type="text" placeholder="Болд" className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
-                        <div><label className={styles.textLabel}>Утас <span className="text-red-500">*</span></label><input type="tel" placeholder="9911xxxx" className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
-                        <div className="relative z-20"><label className={styles.textLabel}>Салбар <span className="text-red-500">*</span></label><CustomSelect options={branches} value={branch} onChange={setBranch} placeholder="Салбараа сонгоно уу" /></div>
-                      </>
-                    ) : (
-                      <>
-                        <div><label className={styles.textLabel}>Мэдээлэл <span className="text-red-500">*</span></label><textarea rows={4} placeholder="Үйл ажиллагааны чиглэл..." className={`${styles.inputBase} resize-none`} style={{ fontSize: '16px' }} /></div>
-                        <div><label className={styles.textLabel}>Файл</label><div className={`w-full h-24 ${styles.sunken} rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition-colors cursor-pointer border-dashed border-2 border-transparent hover:border-gray-300`}><Upload size={20} className="text-gray-500 mb-2" /><p className="text-[10px] text-gray-500 font-bold uppercase">Файл оруулах</p></div></div>
-                      </>
-                    )}
-                    
-                    <div className="pt-4 flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center shadow-lg overflow-hidden shrink-0">
-                        <img src="ai-robot.gif" alt="Robot" className="w-full h-full object-cover scale-110 translate-y-1" />
-                      </div>
-
-                      <button onClick={() => setStep(2)} className={`flex-1 py-4 ${styles.primaryButton} rounded-xl font-bold text-sm tracking-widest flex items-center justify-center gap-2`}>
-                        ҮРГЭЛЖЛҮҮЛЭХ
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              )}
 
-              {/* STEP 2 */}
-              {step === 2 && (
-                <div className="animate-fadeIn relative">
-                  {/* Сонгосон Character */}
-                  <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-0 z-10">
-                    <EyeTracker selectedAvatar={selectedAvatar} mood={feedbackType} />
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="relative">
-                        {/* Floating Emoji - Төрөл сонгох-оос дээшээ хөвнө */}
-                        <FloatingEmoji feedbackType={feedbackType} />
-                        <label className={`${styles.textLabel} text-center block mb-4`}>Төрөл сонгох <span className="text-red-500">*</span></label>
-                        <div className="grid grid-cols-3 gap-4">
-                          {['Хүсэлт', 'Талархал', 'Гомдол'].map((type) => (
-                            <button key={type} onClick={() => setFeedbackType(type)} className={`py-3 rounded-xl text-[10px] font-bold transition-all uppercase tracking-wide ${feedbackType === type ? styles.primaryButton : `${styles.raised} text-gray-500 hover:text-gray-800`}`}>{type}</button>
-                          ))}
-                        </div>
-                    </div>
-                    <div className="relative z-20"><label className={styles.textLabel}>Хэнд илгээх <span className="text-red-500">*</span></label><CustomSelect options={recipients} value={recipient} onChange={setRecipient} placeholder="Албан тушаалтан..." /></div>
-                    <div><label className={styles.textLabel}>Дэлгэрэнгүй <span className="text-red-500">*</span></label><textarea rows={4} placeholder="Санал хүсэлтээ энд бичнэ үү..." className={`${styles.inputBase} resize-none`} style={{ fontSize: '16px' }} /></div>
-                    
-                    {/* RATING SECTION */}
-                    <div className="grid grid-cols-1 gap-6">
-                      <div>
-                        <label className={`${styles.textLabel} text-center block`}>Үнэлгээ</label>
-                        <div className={`flex gap-3 p-4 rounded-2xl justify-center ${styles.sunken}`}>
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button 
-                              key={star} 
-                              onClick={() => handleStarClick(star)} 
-                              className="relative focus:outline-none transition-transform active:scale-90 hover:scale-110"
-                              style={{ WebkitTapHighlightColor: 'transparent' }}
-                            >
-                              <Star size={28} className={`${star <= rating ? 'fill-yellow-400 stroke-yellow-300 stroke-[2px] drop-shadow-[0_0_10px_rgba(253,224,71,0.9)] filter' : 'text-gray-300'}`} />
-                              {explodingStars.includes(star) && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  {[...Array(8)].map((_, i) => {
-                                    const angle = (i * 45) * (Math.PI / 180);
-                                    const distance = 30 + Math.random() * 15;
-                                    const tx = Math.cos(angle) * distance + 'px';
-                                    const ty = Math.sin(angle) * distance + 'px';
-                                    const color = ['#FFD700', '#FFA500', '#FF4500'][Math.floor(Math.random() * 3)];
-                                    return (
-                                      <div key={i} className="particle" style={{ '--tx': tx, '--ty': ty, backgroundColor: color }}></div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div><label className={styles.textLabel}>Ажилтны нэр</label><input type="text" placeholder="Заавал биш..." className={styles.inputBase} style={{ fontSize: '16px' }} /></div>
-                    </div>
+                {/* Bottom line */}
+                <div className="w-[65%] max-w-[280px] lg:max-w-[400px] h-[2px] bg-white/80 rounded-full -mt-24 sm:-mt-32 lg:-mt-36"></div>
 
-                    <div className="pt-4 flex gap-3">
-                      <button onClick={() => setStep(1)} className={`w-14 h-14 rounded-xl ${styles.raised} flex items-center justify-center text-gray-600 hover:text-gray-900 active:scale-95 transition-all flex-shrink-0`}>
-                        <ArrowLeft size={20} />
-                      </button>
-                      <button className={`flex-1 py-4 ${styles.primaryButton} rounded-xl font-bold text-sm tracking-widest flex items-center justify-center gap-2`}><Send size={18} /> ИЛГЭЭХ</button>
-                    </div>
-                  </div>
-                </div>
-              )}
+                {/* Swipe hint */}
+                <p className="font-poppins text-white text-[10px] lg:text-[12px] mt-3 font-medium tracking-wide lg:tracking-widest">↕ ДЭЭШ ДООШ ЧИРЭХ</p>
+              </div>
+
+              {/* Bottom - Цааш button */}
+              <div className="mb-[12vh] lg:mb-[8vh] z-10">
+                <button
+                  onClick={() => setStep(2)}
+                  className="font-opensans px-12 lg:px-16 py-3.5 lg:py-4 bg-white rounded-full font-extrabold text-sm lg:text-base tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all"
+                >
+                  Цааш
+                </button>
+              </div>
             </div>
+          )}
+
+          {/* STEP 2 - Dark themed feedback page */}
+          {step === 2 && (
+          <div className="w-full min-h-screen bg-[#0048BA] animate-fadeIn">
             
+            {/* Top header bar */}
+            <div className="sticky top-0 z-50 flex items-end bg-[#003DA0] border-b border-[#1A6AD4] px-4 lg:px-0 pt-3">
+              <div className="w-full lg:max-w-[800px] lg:mx-auto flex items-end">
+              {/* Selected avatar (small circle) */}
+              <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-[#00B2E7] flex items-center justify-center overflow-hidden flex-shrink-0 mb-2">
+                <div className="w-full h-full p-0.5">
+                  {renderCharacter(selectedAvatar, { x: 0, y: 0 })}
+                </div>
+              </div>
+              {/* Tabs - evenly spaced */}
+              <div className="flex flex-1 ml-4 lg:ml-6">
+                {['ХҮСЭЛТ', 'ГОМДОЛ', 'ТАЛАРХАЛ'].map((type) => {
+                  const isActive = 
+                    (feedbackType === 'Хүсэлт' && type === 'ХҮСЭЛТ') || 
+                    (feedbackType === 'Гомдол' && type === 'ГОМДОЛ') || 
+                    (feedbackType === 'Талархал' && type === 'ТАЛАРХАЛ');
+                  return (
+                    <button 
+                      key={type} 
+                      onClick={() => { setFeedbackType(type === 'ХҮСЭЛТ' ? 'Хүсэлт' : type === 'ГОМДОЛ' ? 'Гомдол' : 'Талархал'); setActiveTab('select'); }}
+                      className="flex-1 flex justify-center"
+                    >
+                      <span style={{ marginTop: '-14px' }} className={`font-montserrat text-center pb-2 text-[11px] lg:text-[13px] font-black tracking-widest transition-all border-b-2 -mb-[1px] ${
+                        isActive ? 'text-white border-white' : 'text-white/70 hover:text-white border-transparent'
+                      }`}>
+                        {type}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-6 pt-8 sm:pt-10 lg:max-w-[800px] lg:mx-auto lg:pt-12 lg:px-8"
+              onTouchStart={(e) => { feedbackSwipeRef.current = e.touches[0].clientX; }}
+              onTouchEnd={(e) => {
+                if (feedbackSwipeRef.current === null) return;
+                const diff = e.changedTouches[0].clientX - feedbackSwipeRef.current;
+                feedbackSwipeRef.current = null;
+                if (Math.abs(diff) < 50) return;
+                const currentIdx = feedbackTypesOrder.indexOf(feedbackType);
+                if (diff < 0 && currentIdx < feedbackTypesOrder.length - 1) {
+                  setFeedbackType(feedbackTypesOrder[currentIdx + 1]);
+                  setActiveTab('select');
+                } else if (diff > 0 && currentIdx > 0) {
+                  setFeedbackType(feedbackTypesOrder[currentIdx - 1]);
+                  setActiveTab('select');
+                }
+              }}
+            >
+            {/* ХҮСЭЛТ has its own dedicated page */}
+            {feedbackType === 'Хүсэлт' ? (
+              <>
+                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
+                {/* Circular wheel carousel */}
+                <div 
+                  ref={wheelRefCallback}
+                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
+                  style={{ height: 220, touchAction: 'none' }}
+                  onTouchStart={handleWheelTouchStart}
+                  onTouchMove={handleWheelTouchMove}
+                  onTouchEnd={handleWheelTouchEnd}
+                  onMouseDown={handleWheelMouseDown}
+                  onMouseMove={handleWheelMouseMove}
+                  onMouseUp={handleWheelMouseUp}
+                  onMouseLeave={handleWheelMouseUp}
+                >
+                  {renderBranchWheel()}
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
+                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
+                </div>
+
+                {/* Main content card */}
+                <div className="rounded-[30px] p-5 mb-5 relative">
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
+                  <div className="space-y-0">
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
+                      <textarea
+                        value={detail}
+                        onChange={(e) => setDetail(e.target.value)}
+                        placeholder="Энд бичнэ үү..."
+                        rows={3}
+                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
+                      />
+                      <div className="border-t border-[#1A6AD4]"></div>
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="fileUpload1"
+                      />
+                      <div
+                        onClick={() => document.getElementById('fileUpload1').click()}
+                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
+                      >
+                        <Upload size={20} className="text-white mb-1" />
+                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
+                      </div>
+                      {uploadedFiles.length > 0 && (
+                        <div className="mt-2 space-y-1.5">
+                          {uploadedFiles.map((f) => (
+                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+                              {f.preview ? (
+                                <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                              ) : (
+                                <span className="text-[16px] flex-shrink-0">{getFileIcon(f.type)}</span>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
+                                <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
+                              </div>
+                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="border-t border-[#1A6AD4] mt-3"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom buttons */}
+                <div className="flex gap-4 px-2">
+                  <button onClick={() => setStep(1)} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
+                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
+                </div>
+              </>
+            ) : (
+            <>
+            {/* ГОМДОЛ / ТАЛАРХАЛ flow */}
+            {activeTab === 'select' ? (
+              <>
+                {/* Toggle cards - АЖИЛТАНД / БАЙГУУЛЛАГТ */}
+                <div className="grid grid-cols-2 gap-4 mb-5 px-2">
+                  <button 
+                    onClick={() => setActiveTab('person')}
+                    className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-between aspect-square transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
+                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-3">
+                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">АЖИЛТАНД ТАЛАРХАЛ</p>
+                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">ИЛГЭЭХ</p>
+                    </div>
+                    <span className="relative z-10 font-opensans bg-white rounded-full px-5 py-1.5 text-[9px] font-extrabold text-gray-800 tracking-wider mb-3">АЖИЛТАНД</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('org')}
+                    className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-between aspect-square transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
+                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-3">
+                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">БАЙГУУЛЛАГТ ТАЛАРХАЛ</p>
+                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">ИЛГЭЭХ</p>
+                    </div>
+                    <span className="relative z-10 font-opensans bg-white rounded-full px-5 py-1.5 text-[9px] font-extrabold text-gray-800 tracking-wider mb-3">БАЙГУУЛЛАГТ</span>
+                  </button>
+                </div>
+
+                {/* Сурталчилгааны баннер */}
+                <div className="mx-2 mb-5">
+                  {renderAdBanner()}
+                </div>
+                {/* Видео зар */}
+                <div className="mx-2 mb-5">
+                  {renderVideoBanner()}
+                </div>
+
+                {/* Bottom button */}
+                <div className="flex justify-center px-2">
+                  <button onClick={() => setStep(1)} className="px-12 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
+                </div>
+              </>
+            ) : activeTab === 'person' ? (
+              <>
+                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
+                {/* Circular wheel carousel */}
+                <div 
+                  ref={wheelRefCallback}
+                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
+                  style={{ height: 220, touchAction: 'none' }}
+                  onTouchStart={handleWheelTouchStart}
+                  onTouchMove={handleWheelTouchMove}
+                  onTouchEnd={handleWheelTouchEnd}
+                  onMouseDown={handleWheelMouseDown}
+                  onMouseMove={handleWheelMouseMove}
+                  onMouseUp={handleWheelMouseUp}
+                  onMouseLeave={handleWheelMouseUp}
+                >
+                  {renderBranchWheel()}
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
+                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
+                </div>
+
+                {/* Main content card */}
+                <div className="rounded-[30px] p-5 mb-5 relative">
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
+                  <div className="space-y-0">
+                    <div className="relative">
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">АЛБАН ТУШААЛ</p>
+                      <div
+                        className="flex items-center justify-between py-2.5 cursor-pointer group"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                      >
+                        <span className={`font-poppins text-[13px] pl-1 ${recipient ? 'text-white' : 'text-white/70'}`}>
+                          {recipient || 'Сонгох...'}
+                        </span>
+                        <ChevronDown size={16} className={`text-white/70 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+                      </div>
+                      <div className="border-t border-[#1A6AD4]"></div>
+                      {dropdownOpen && (
+                        <div className="absolute left-0 right-0 mt-1 rounded-xl bg-[#003DA0] border border-[#1A6AD4] shadow-2xl z-50 overflow-hidden animate-fadeIn">
+                          {recipients.map((r) => (
+                            <div
+                              key={r}
+                              onClick={() => { setRecipient(r); setDropdownOpen(false); }}
+                              className={`font-poppins px-4 py-3 text-[13px] cursor-pointer transition-all ${
+                                recipient === r
+                                  ? 'bg-[#00B2E7]/20 text-white'
+                                  : 'text-white hover:bg-white/5'
+                              }`}
+                            >
+                              {r}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
+                      <textarea
+                        value={detail}
+                        onChange={(e) => setDetail(e.target.value)}
+                        placeholder="Энд бичнэ үү..."
+                        rows={3}
+                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
+                      />
+                      <div className="border-t border-[#1A6AD4]"></div>
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ӨӨРИЙН УТАС</p>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 8);
+                          setPhone(val);
+                        }}
+                        placeholder="8 оронтой дугаар"
+                        maxLength={8}
+                        inputMode="numeric"
+                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none placeholder-white/40"
+                      />
+                      <div className={`border-t ${phone.length > 0 && phone.length < 8 ? 'border-red-500' : 'border-[#1A6AD4]'}`}></div>
+                      {phone.length > 0 && phone.length < 8 && (
+                        <p className="font-poppins text-red-400 text-[9px] mt-1 pl-1">{8 - phone.length} тэмдэгт дутуу</p>
+                      )}
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">АЖИЛТНЫ НЭР ЗААВАЛ БИШ</p>
+                      <input
+                        type="text"
+                        value={workerName}
+                        onChange={(e) => setWorkerName(e.target.value)}
+                        placeholder="Нэр оруулах..."
+                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none placeholder-white/40"
+                      />
+                      <div className="border-t border-[#1A6AD4]"></div>
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
+                      >
+                        <Upload size={20} className="text-white mb-1" />
+                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
+                      </div>
+                      {uploadedFiles.length > 0 && (
+                        <div className="mt-2 space-y-1.5">
+                          {uploadedFiles.map((f) => (
+                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+                              {f.preview ? (
+                                <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                              ) : (
+                                <span className="text-[16px] flex-shrink-0">{getFileIcon(f.type)}</span>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
+                                <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
+                              </div>
+                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="border-t border-[#1A6AD4] mt-3"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom buttons */}
+                <div className="flex gap-4 px-2">
+                  <button onClick={() => setActiveTab('select')} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
+                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
+                {/* Circular wheel carousel */}
+                <div 
+                  ref={wheelRefCallback}
+                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
+                  style={{ height: 220, touchAction: 'none' }}
+                  onTouchStart={handleWheelTouchStart}
+                  onTouchMove={handleWheelTouchMove}
+                  onTouchEnd={handleWheelTouchEnd}
+                  onMouseDown={handleWheelMouseDown}
+                  onMouseMove={handleWheelMouseMove}
+                  onMouseUp={handleWheelMouseUp}
+                  onMouseLeave={handleWheelMouseUp}
+                >
+                  {renderBranchWheel()}
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
+                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
+                </div>
+
+                {/* Main content card */}
+                <div className="rounded-[30px] p-5 mb-5 relative">
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
+                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
+                  <div className="space-y-0">
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
+                      <textarea
+                        value={detail}
+                        onChange={(e) => setDetail(e.target.value)}
+                        placeholder="Энд бичнэ үү..."
+                        rows={3}
+                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
+                      />
+                      <div className="border-t border-[#1A6AD4]"></div>
+                    </div>
+                    <div className="h-4"></div>
+                    <div>
+                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        id="fileUpload3"
+                      />
+                      <div
+                        onClick={() => document.getElementById('fileUpload3').click()}
+                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
+                      >
+                        <Upload size={20} className="text-white mb-1" />
+                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
+                      </div>
+                      {uploadedFiles.length > 0 && (
+                        <div className="mt-2 space-y-1.5">
+                          {uploadedFiles.map((f) => (
+                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+                              {f.preview ? (
+                                <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
+                              ) : (
+                                <span className="text-[16px] flex-shrink-0">{getFileIcon(f.type)}</span>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
+                                <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
+                              </div>
+                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <div className="border-t border-[#1A6AD4] mt-3"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom buttons */}
+                <div className="flex gap-4 px-2">
+                  <button onClick={() => setActiveTab('select')} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
+                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
+                </div>
+              </>
+            )}
+            </>
+            )}
           </div>
+          </div>
+          )}
+
         </div>
       </div>
+      {/* Magnifier overlay */}
+      {magnifier.visible && magnifier.idx !== null && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setMagnifier({ visible: false, idx: null, x: 0, y: 0 })}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <div className="relative animate-scaleIn">
+            <div className="w-56 h-80 rounded-2xl overflow-hidden shadow-2xl ring-2 ring-white/30">
+              <img
+                src={branchImages[magnifier.idx]}
+                className="w-full h-full object-cover"
+                alt={branches[magnifier.idx]}
+                draggable={false}
+              />
+            </div>
+            <p className="text-white text-sm font-bold tracking-wider text-center mt-3 uppercase drop-shadow-lg">{branches[magnifier.idx]}</p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
+
