@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, Upload, Check } from 'lucide-react';
 
@@ -797,10 +798,17 @@ export default function App() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [detail, setDetail] = useState('');
   const [phone, setPhone] = useState('');
+  const [userName, setUserName] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [workerName, setWorkerName] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [selectedPosition, setSelectedPosition] = useState('');
+  const [positionDropdownOpen, setPositionDropdownOpen] = useState(false);
+  const positions = ['Менежер', 'Салбарын захирал', 'Хүний нөөц', 'Маркетинг алба', 'Бусад'];
   const fileInputRef = useRef(null);
   const feedbackSwipeRef = useRef(null);
+  const globalSwipeRef = useRef(null);
   const feedbackTypesOrder = ['Хүсэлт', 'Гомдол', 'Талархал'];
 
   // Сурталчилгааны өгөгдөл - 3 секунд болгонд солигдоно
@@ -812,7 +820,7 @@ export default function App() {
   ];
 
   useEffect(() => {
-    if (step !== 2) return;
+    if (step !== 2 && step !== 3) return;
     const timer = setInterval(() => setAdIndex(prev => (prev + 1) % ads.length), 3000);
     return () => clearInterval(timer);
   }, [step, ads.length]);
@@ -1185,6 +1193,7 @@ export default function App() {
   // Header component removed - no longer used
 
   // Сурталчилгааны баннер - 3 секунд болгонд солигдоно
+  // eslint-disable-next-line no-unused-vars
   const renderAdBanner = (extraClass = '') => {
     const ad = ads[adIndex];
     return (
@@ -1212,6 +1221,7 @@ export default function App() {
   };
 
   // Видео зарын баннер
+  // eslint-disable-next-line no-unused-vars
   const renderVideoBanner = (extraClass = '') => {
     const vid = videoAds[videoAdIndex];
     return (
@@ -1293,6 +1303,9 @@ export default function App() {
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        @keyframes bannerFade { 0% { opacity: 0; transform: scale(1.08); } 100% { opacity: 1; transform: scale(1); } }
+        .animate-bannerFade { animation: bannerFade 0.7s ease-out forwards; }
+
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
 
@@ -1357,132 +1370,325 @@ export default function App() {
       <div 
         ref={contentRef}
         className="relative w-screen h-screen overflow-y-auto transition-transform duration-300 ease-out"
+        onTouchStart={(e) => { globalSwipeRef.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (globalSwipeRef.current === null) return;
+          const diff = e.changedTouches[0].clientX - globalSwipeRef.current;
+          globalSwipeRef.current = null;
+          if (diff > 80) {
+            if (step === 3 && activeTab !== 'select' && feedbackType !== 'Хүсэлт') {
+              setActiveTab('select');
+            } else if (step === 3) {
+              setStep(2); setActiveTab('select'); setShowWarning(false);
+            } else if (step === 2) {
+              setStep(1);
+            }
+          }
+        }}
       >
         <div className="w-full min-h-full relative z-10">
           
           {/* STEP 1 - Avatar selection (exact match to design) */}
           {step === 1 && (
-            <div className="w-full h-screen bg-gradient-to-b from-[#1a9fd4] via-[#00B2E7] to-[#B3E5FC] lg:bg-gradient-to-br lg:from-[#0048BA] lg:via-[#0060D0] lg:to-[#00B2E7] flex flex-col items-center animate-fadeIn relative overflow-hidden">
+            <div className="w-full h-screen bg-[#1a1a2e] flex flex-col animate-fadeIn relative overflow-hidden">
 
-              {/* Title */}
-              <div className="text-center mt-[20vh] lg:mt-[10vh] z-10">
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase" style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.2)', letterSpacing: '2px' }}>
-                  АВАТАРАА
-                </h1>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white uppercase" style={{ fontFamily: "'Montserrat', sans-serif", textShadow: '0 2px 10px rgba(0,0,0,0.2)', letterSpacing: '2px' }}>
-                  СОНГООРОЙ
-                </h1>
+              {/* Dark header with logo - centered */}
+              <div className="w-full px-5 pt-10 pb-4 flex flex-col items-center">
+                <img src={`${process.env.PUBLIC_URL}/bichil_logo.png`} alt="Logo" className="w-15 h-15 object-contain" />
               </div>
 
-              {/* Center - white line, avatar, white line */}
-              <div className="flex-1 flex flex-col items-center justify-center z-10 w-full px-8">
-                {/* Top line */}
-                <div className="w-[65%] max-w-[280px] lg:max-w-[400px] h-[2px] bg-white/80 rounded-full mb-3 sm:mb-6"></div>
+              {/* Green rounded panel */}
+              <div className="mx-4 mt-auto mb-4 bg-[#2EAA6E] rounded-3xl flex flex-col items-center relative overflow-hidden" style={{ height: '74vh' }}>
 
-                {/* Avatar - swipeable (up/down drag) */}
-                <div 
-                  className="w-[260px] h-[260px] sm:w-[300px] sm:h-[300px] lg:w-[350px] lg:h-[350px] cursor-grab active:cursor-grabbing select-none"
-                  style={{ transform: `translateY(${swipeY}px)`, transition: isDragging ? 'none' : 'transform 0.3s ease-out' }}
-                  onTouchStart={(e) => { touchStartY.current = e.touches[0].clientY; setIsDragging(true); }}
-                  onTouchMove={(e) => {
-                    if (touchStartY.current === null) return;
-                    const diff = e.touches[0].clientY - touchStartY.current;
-                    setSwipeY(Math.max(-80, Math.min(80, diff)));
-                  }}
-                  onTouchEnd={() => {
-                    setIsDragging(false);
-                    if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
-                    else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
-                    setSwipeY(0);
-                    touchStartY.current = null;
-                  }}
-                  onMouseDown={(e) => { dragStartY.current = e.clientY; setIsDragging(true); e.preventDefault(); }}
-                  onMouseMove={(e) => {
-                    if (dragStartY.current === null || !isDragging) return;
-                    const diff = e.clientY - dragStartY.current;
-                    setSwipeY(Math.max(-80, Math.min(80, diff)));
-                  }}
-                  onMouseUp={() => {
-                    setIsDragging(false);
-                    if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
-                    else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
-                    setSwipeY(0);
-                    dragStartY.current = null;
-                  }}
-                  onMouseLeave={() => {
-                    if (isDragging) {
+                {/* Title */}
+                <div className="text-center mt-4 mb-3 z-10">
+                  <h1 className="text-[22px] sm:text-2xl lg:text-3xl font-black text-white uppercase leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '1.5px' }}>
+                    {'\u0421\u0410\u041D\u0410\u041B \u0413\u041E\u041C\u0414\u041B\u042B\u041D'}
+                  </h1>
+                  <h1 className="text-[22px] sm:text-2xl lg:text-3xl font-black text-white uppercase leading-tight" style={{ fontFamily: "'Montserrat', sans-serif", letterSpacing: '1.5px' }}>
+                    {'\u0425\u0423\u0423\u0414\u0410\u0421'}
+                  </h1>
+                </div>
+
+                {/* Avatar area with left/right arrows */}
+                <div className="flex items-center justify-center w-full px-2 z-10 pt-6 pb-4">
+                  {/* Left arrow */}
+                  <button
+                    onClick={() => setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1)}
+                    className="w-10 h-10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+
+                  {/* Avatar display */}
+                  <div 
+                    className="w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] lg:w-[300px] lg:h-[300px] mx-2 bg-[#268F5A] rounded-md flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+                    style={{ transform: `translateX(${swipeY}px)`, transition: isDragging ? 'none' : 'transform 0.3s ease-out' }}
+                    onTouchStart={(e) => { touchStartY.current = e.touches[0].clientX; setIsDragging(true); }}
+                    onTouchMove={(e) => {
+                      if (touchStartY.current === null) return;
+                      const diff = e.touches[0].clientX - touchStartY.current;
+                      setSwipeY(Math.max(-80, Math.min(80, diff)));
+                    }}
+                    onTouchEnd={() => {
+                      setIsDragging(false);
+                      if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                      else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                      setSwipeY(0);
+                      touchStartY.current = null;
+                    }}
+                    onMouseDown={(e) => { dragStartY.current = e.clientX; setIsDragging(true); e.preventDefault(); }}
+                    onMouseMove={(e) => {
+                      if (dragStartY.current === null || !isDragging) return;
+                      const diff = e.clientX - dragStartY.current;
+                      setSwipeY(Math.max(-80, Math.min(80, diff)));
+                    }}
+                    onMouseUp={() => {
                       setIsDragging(false);
                       if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
                       else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
                       setSwipeY(0);
                       dragStartY.current = null;
-                    }
-                  }}
-                  onWheel={(e) => {
-                    e.preventDefault();
-                    if (e.deltaY > 0) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
-                    else setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
-                  }}
-                >
-                  <EyeTracker selectedAvatar={selectedAvatar} />
+                    }}
+                    onMouseLeave={() => {
+                      if (isDragging) {
+                        setIsDragging(false);
+                        if (swipeY < -30) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                        else if (swipeY > 30) setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                        setSwipeY(0);
+                        dragStartY.current = null;
+                      }
+                    }}
+                    onWheel={(e) => {
+                      e.preventDefault();
+                      if (e.deltaY > 0) setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1);
+                      else setSelectedAvatar(prev => prev <= 1 ? 6 : prev - 1);
+                    }}
+                  >
+                    <div className="w-[85%] h-[85%]">
+                      <EyeTracker selectedAvatar={selectedAvatar} />
+                    </div>
+                  </div>
+
+                  {/* Right arrow */}
+                  <button
+                    onClick={() => setSelectedAvatar(prev => prev >= 6 ? 1 : prev + 1)}
+                    className="w-10 h-10 flex items-center justify-center text-white/90 hover:text-white transition-colors flex-shrink-0"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
                 </div>
 
-                {/* Bottom line */}
-                <div className="w-[65%] max-w-[280px] lg:max-w-[400px] h-[2px] bg-white/80 rounded-full -mt-24 sm:-mt-32 lg:-mt-36"></div>
+                {/* Hint text */}
+                <div className="flex items-center gap-1.5 mb-4 z-10">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+                  <p className="font-poppins text-white text-[11px] font-medium tracking-wide">{'\u0422\u0430 \u04e9\u04e9\u0440\u0438\u0439\u043d\u0445\u04e9\u04e9 \u043d\u04af\u04af\u0440 \u0434\u04af\u0440\u0438\u0439\u0433 \u0441\u043e\u043d\u0433\u043e\u043e\u0440\u043e\u0439'}</p>
+                </div>
 
-                {/* Swipe hint */}
-                <p className="font-poppins text-white text-[10px] lg:text-[12px] mt-3 font-medium tracking-wide lg:tracking-widest">↕ ДЭЭШ ДООШ ЧИРЭХ</p>
+                {/* Continue button - INSIDE green panel */}
+                <div className="px-8 pb-6 mt-auto z-10 w-full">
+                  <button
+                    onClick={() => setStep(2)}
+                    className="font-opensans w-full max-w-[320px] mx-auto block py-4 bg-white rounded-full font-extrabold text-sm lg:text-base tracking-[0.15em] text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all uppercase"
+                  >
+                    {'\u04AE\u0420\u0413\u042D\u041B\u0416\u041B\u04AE\u04AE\u041B\u042D\u0425'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 - Menu selection */}
+          {step === 2 && (
+            <div className="w-full h-screen bg-[#0f0f2e] flex flex-col animate-fadeIn relative overflow-hidden">
+
+              {/* Ad banner carousel */}
+              <div className="mx-4 mt-6 rounded-2xl overflow-hidden relative" style={{ height: '22vh' }}>
+                <div key={adIndex} className="absolute inset-0 animate-bannerFade">
+                  <img src={ads[adIndex].img} alt={ads[adIndex].label} className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30"></div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-center px-4">
+                      <p className="font-montserrat text-white text-sm font-bold tracking-wider drop-shadow-lg">{ads[adIndex].label}</p>
+                      <p className="font-poppins text-white text-[11px] mt-1 drop-shadow-lg">{ads[adIndex].title}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-between px-3 z-20">
+                  <button onClick={() => setAdIndex(prev => prev <= 0 ? ads.length - 1 : prev - 1)} className="text-white/80 hover:text-white transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <button onClick={() => setAdIndex(prev => (prev + 1) % ads.length)} className="text-white/80 hover:text-white transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+                {/* Dots */}
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10">
+                  {ads.map((_, i) => (
+                    <span key={i} className={`w-2 h-2 rounded-full transition-all ${i === adIndex ? 'bg-white' : 'bg-white/40'}`}></span>
+                  ))}
+                </div>
               </div>
 
-              {/* Bottom - Цааш button */}
-              <div className="mb-[12vh] lg:mb-[8vh] z-10">
+              {/* Title text */}
+              <div className="text-center mt-8 mb-6 px-6">
+                <h2 className="font-montserrat text-white text-xl font-black leading-snug">{`\u0422\u0430 \u0434\u043e\u043e\u0440\u0445 \u0446\u044d\u0441\u044d\u044d\u0441`}</h2>
+                <h2 className="font-montserrat text-white text-xl font-black leading-snug">{`\u0441\u043e\u043d\u0433\u043e\u043b\u0442\u043e\u043e \u0445\u0438\u0439\u043d\u044d \u04af\u04af`}</h2>
+              </div>
+
+              {/* Three menu cards */}
+              <div className="px-4 grid grid-cols-2 gap-3">
+                {/* Хүсэлт илгээх */}
                 <button
-                  onClick={() => setStep(2)}
-                  className="font-opensans px-12 lg:px-16 py-3.5 lg:py-4 bg-white rounded-full font-extrabold text-sm lg:text-base tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all"
+                  onClick={() => { setFeedbackType('\u0425\u04af\u0441\u044d\u043b\u0442'); setStep(3); }}
+                  className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative"
+                  style={{ background: 'linear-gradient(135deg, #4A90D9 0%, #357ABD 100%)' }}
                 >
-                  Цааш
+                  <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
+                </button>
+                {/* Гомдол илгээх */}
+                <button
+                  onClick={() => { setFeedbackType('\u0413\u043e\u043c\u0434\u043e\u043b'); setStep(3); }}
+                  className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative"
+                  style={{ background: 'linear-gradient(135deg, #4A4A5A 0%, #333340 100%)' }}
+                >
+                  <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0413\u043e\u043c\u0434\u043e\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
+                </button>
+                {/* Талархал илгээх */}
+                <button
+                  onClick={() => { setFeedbackType('\u0422\u0430\u043b\u0430\u0440\u0445\u0430\u043b'); setStep(3); }}
+                  className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] col-span-1 relative"
+                  style={{ background: 'linear-gradient(135deg, #00D4FF 0%, #00B2E7 100%)' }}
+                >
+                  <img src="https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0422\u0430\u043b\u0430\u0440\u0445\u0430\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* STEP 2 - Dark themed feedback page */}
-          {step === 2 && (
-          <div className="w-full min-h-screen bg-[#0048BA] animate-fadeIn">
-            
-            {/* Top header bar */}
-            <div className="sticky top-0 z-50 flex items-end bg-[#003DA0] border-b border-[#1A6AD4] px-4 lg:px-0 pt-3">
-              <div className="w-full lg:max-w-[800px] lg:mx-auto flex items-end">
-              {/* Selected avatar (small circle) */}
-              <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-full bg-[#00B2E7] flex items-center justify-center overflow-hidden flex-shrink-0 mb-2">
-                <div className="w-full h-full p-0.5">
-                  {renderCharacter(selectedAvatar, { x: 0, y: 0 })}
+          {/* STEP 3 - Dark themed feedback page */}
+          {step === 3 && feedbackType === 'Хүсэлт' && !showSuccess && (
+            <div className="w-full min-h-screen bg-[#0f0f2e] animate-fadeIn flex flex-col">
+
+              {/* Ad banner carousel */}
+              <div className="mx-4 mt-6 rounded-2xl overflow-hidden relative" style={{ height: '22vh' }}>
+                <div key={adIndex} className="absolute inset-0 animate-bannerFade">
+                  <img src={ads[adIndex].img} alt={ads[adIndex].label} className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30"></div>
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-center px-4">
+                      <p className="font-montserrat text-white text-sm font-bold tracking-wider drop-shadow-lg">{ads[adIndex].label}</p>
+                      <p className="font-poppins text-white text-[11px] mt-1 drop-shadow-lg">{ads[adIndex].title}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-between px-3 z-20">
+                  <button onClick={() => setAdIndex(prev => prev <= 0 ? ads.length - 1 : prev - 1)} className="text-white/80 hover:text-white transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <button onClick={() => setAdIndex(prev => (prev + 1) % ads.length)} className="text-white/80 hover:text-white transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                </div>
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10">
+                  {ads.map((_, i) => (
+                    <span key={i} className={`w-2 h-2 rounded-full transition-all ${i === adIndex ? 'bg-white' : 'bg-white/40'}`}></span>
+                  ))}
                 </div>
               </div>
-              {/* Tabs - evenly spaced */}
-              <div className="flex flex-1 ml-4 lg:ml-6">
-                {['ХҮСЭЛТ', 'ГОМДОЛ', 'ТАЛАРХАЛ'].map((type) => {
-                  const isActive = 
-                    (feedbackType === 'Хүсэлт' && type === 'ХҮСЭЛТ') || 
-                    (feedbackType === 'Гомдол' && type === 'ГОМДОЛ') || 
-                    (feedbackType === 'Талархал' && type === 'ТАЛАРХАЛ');
-                  return (
-                    <button 
-                      key={type} 
-                      onClick={() => { setFeedbackType(type === 'ХҮСЭЛТ' ? 'Хүсэлт' : type === 'ГОМДОЛ' ? 'Гомдол' : 'Талархал'); setActiveTab('select'); }}
-                      className="flex-1 flex justify-center"
-                    >
-                      <span style={{ marginTop: '-14px' }} className={`font-montserrat text-center pb-2 text-[11px] lg:text-[13px] font-black tracking-widest transition-all border-b-2 -mb-[1px] ${
-                        isActive ? 'text-white border-white' : 'text-white/70 hover:text-white border-transparent'
-                      }`}>
-                        {type}
-                      </span>
-                    </button>
-                  );
-                })}
+
+              {/* Title */}
+              <h2 className="font-montserrat text-white text-xl font-black text-center mt-6 mb-5">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0445\u044d\u0441\u044d\u0433`}</h2>
+
+              {/* Name input */}
+              <div className="mx-12 mb-3 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder={`\u0422\u0430\u043d\u044b \u043d\u044d\u0440 ...`}
+                  className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                />
               </div>
+
+              {/* Phone input */}
+              <div className="mx-12 mb-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={`\u0425\u043e\u043b\u0431\u043e\u0433\u0434\u043e\u0445 \u0443\u0442\u0430\u0441 ...`}
+                  className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                />
+              </div>
+
+              {/* Textarea card */}
+              <div className="mx-4 mb-4 bg-white rounded-2xl p-4 pb-8">
+                <p className="font-poppins text-gray-800 text-sm font-bold mb-2">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0431\u0438\u0447\u0438\u0445`}</p>
+                <div className="border-t-2 border-gray-400 rounded-t-2xl h-[72px] -mx-4"></div>
+                <textarea
+                  value={detail}
+                  onChange={(e) => setDetail(e.target.value)}
+                  placeholder={`\u0425\u04af\u0441\u044d\u043b\u0442\u044d\u044d \u0431\u0438\u0447\u043d\u044d \u04af\u04af ...`}
+                  rows={7}
+                  className="w-full font-poppins text-gray-700 text-sm outline-none resize-none placeholder-gray-400 -mt-14"
+                />
+              </div>
+
+              {/* Warning text */}
+              {showWarning && (
+              <div className="mx-4 mb-5 flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs font-bold leading-none">!</span>
+                </div>
+                <p className="font-poppins text-white/60 text-[11px]">{`\u0422\u0430\u043b\u0431\u0430\u0440 \u0431\u04af\u0440\u044d\u043d \u0431\u04e9\u0433\u043b\u04e9\u0433\u0434\u04e9\u04e9\u0433\u04af\u0439 \u0431\u0430\u0439\u043d\u0430.`}</p>
+              </div>
+              )}
+
+              {/* Submit button */}
+              <div className="mx-4 mt-12 mb-8">
+                <button onClick={() => { if (!userName.trim() || !phone.trim() || !detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">{`\u0418\u043b\u0433\u044d\u044d\u0445`}</button>
+              </div>
+
+            </div>
+          )}
+
+          {/* SUCCESS PAGE */}
+          {showSuccess && (
+            <div className="w-full h-screen bg-[#0f0f2e] flex items-center justify-center animate-fadeIn p-4">
+            <div className="w-full bg-white rounded-3xl flex flex-col overflow-hidden" style={{ maxHeight: '96vh', minHeight: '92vh' }}>
+              {/* Logo header */}
+              <div className="flex justify-center" style={{ paddingTop: '3vh', paddingBottom: '2vh' }}>
+                <img src="bichil_logo.png" alt="logo" className="object-contain" style={{ height: '12vh' }} />
+              </div>
+
+              {/* Center content */}
+              <div className="flex-1 flex flex-col items-center px-8">
+                <div className="rounded-full border-2 border-gray-300 flex items-center justify-center success-circle success-circle-bounce" style={{ width: '18vh', height: '18vh', marginTop: '8vh', marginBottom: '4vh' }}>
+                  <svg className="success-check" style={{ width: '7vh', height: '7vh' }} viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div style={{ marginTop: 'auto', marginBottom: 'auto', transform: 'translateY(6vh)' }}>
+                  <h2 className="font-montserrat text-gray-800 font-black text-center leading-snug" style={{ fontSize: '2.3vh', marginBottom: '1.5vh' }}>{`\u0422\u0430\u043d\u044b \u0445\u04af\u0441\u044d\u043b\u0442`}<br />{`\u0430\u043c\u0436\u0438\u043b\u0442\u0442\u0430\u0439 \u0438\u043b\u0433\u044d\u044d\u0433\u0434\u043b\u044d\u044d.`}</h2>
+                  <p className="font-poppins text-gray-400 text-center leading-relaxed" style={{ fontSize: '1.3vh' }}>{`\u0422\u0430\u043d\u044b \u0445\u04af\u0441\u044d\u043b\u0442\u0438\u0439\u0433 \u0434\u0430\u0440\u0443\u0443 \u043d\u044d\u0433\u0434\u04af\u04af\u043b\u044d\u043d \u0445\u0430\u043d\u0434\u0443\u0443\u043b\u0430\u0445 \u0431\u043e\u043b\u043d\u043e. \u0422\u0430\u043d\u0434 \u0431\u0430\u044f\u0440\u043b\u0430\u043b\u0430\u0430.`}</p>
+                </div>
+
+                {/* Bottom buttons */}
+                <div className="w-full space-y-3" style={{ paddingLeft: '6vw', paddingRight: '6vw', marginBottom: '4vh' }}>
+                  <button className="w-full font-opensans bg-[#0048BA] rounded-full font-extrabold tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all" style={{ padding: '1.6vh 0', fontSize: '1.5vh' }}>{`\u0425\u043e\u043b\u0431\u043e\u043e \u0431\u0430\u0440\u0438\u0445`}</button>
+                  <button onClick={() => { setShowSuccess(false); setStep(1); setUserName(''); setPhone(''); setDetail(''); setShowWarning(false); }} className="w-full font-opensans bg-[#22c55e] rounded-full font-extrabold tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all" style={{ padding: '1.6vh 0', fontSize: '1.5vh' }}>{`\u0421\u0430\u0439\u0442\u0440\u0443\u0443 \u0437\u043e\u0447\u043b\u043e\u0445`}</button>
+                </div>
               </div>
             </div>
+            </div>
+          )}
+
+          {step === 3 && feedbackType !== 'Хүсэлт' && (
+          <div className="w-full min-h-screen animate-fadeIn" style={{ backgroundColor: activeTab === 'person' ? '#0048BA' : '#0f0f2e' }}>
 
             <div className="p-4 sm:p-6 pt-8 sm:pt-10 lg:max-w-[800px] lg:mx-auto lg:pt-12 lg:px-8"
               onTouchStart={(e) => { feedbackSwipeRef.current = e.touches[0].clientX; }}
@@ -1501,66 +1707,140 @@ export default function App() {
                 }
               }}
             >
-            {/* ХҮСЭЛТ has its own dedicated page */}
-            {feedbackType === 'Хүсэлт' ? (
+            {/* ГОМДОЛ / ТАЛАРХАЛ flow */}
+            {(activeTab === 'select' || activeTab === 'org' || activeTab === 'person') ? (
               <>
-                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
-                {/* Circular wheel carousel */}
-                <div 
-                  ref={wheelRefCallback}
-                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
-                  style={{ height: 220, touchAction: 'none' }}
-                  onTouchStart={handleWheelTouchStart}
-                  onTouchMove={handleWheelTouchMove}
-                  onTouchEnd={handleWheelTouchEnd}
-                  onMouseDown={handleWheelMouseDown}
-                  onMouseMove={handleWheelMouseMove}
-                  onMouseUp={handleWheelMouseUp}
-                  onMouseLeave={handleWheelMouseUp}
-                >
-                  {renderBranchWheel()}
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
-                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
+                {/* Ad banner carousel */}
+                <div className="mx-4 -mt-2 rounded-2xl overflow-hidden relative" style={{ height: '22vh' }}>
+                  <div key={adIndex} className="absolute inset-0 animate-bannerFade">
+                    <img src={ads[adIndex].img} alt={ads[adIndex].label} className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/30"></div>
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <div className="text-center px-4">
+                        <p className="font-montserrat text-white text-sm font-bold tracking-wider drop-shadow-lg">{ads[adIndex].label}</p>
+                        <p className="font-poppins text-white text-[11px] mt-1 drop-shadow-lg">{ads[adIndex].title}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-between px-3 z-20">
+                    <button onClick={() => setAdIndex(prev => prev <= 0 ? ads.length - 1 : prev - 1)} className="text-white/80 hover:text-white transition-colors">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    </button>
+                    <button onClick={() => setAdIndex(prev => (prev + 1) % ads.length)} className="text-white/80 hover:text-white transition-colors">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                  </div>
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10">
+                    {ads.map((_, i) => (
+                      <span key={i} className={`w-2 h-2 rounded-full transition-all ${i === adIndex ? 'bg-white' : 'bg-white/40'}`}></span>
+                    ))}
+                  </div>
                 </div>
 
-                {/* Main content card */}
-                <div className="rounded-[30px] p-5 mb-5 relative">
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
-                  <div className="space-y-0">
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
+                {/* Title */}
+                <div className="text-center mt-6 mb-5">
+                  <h2 className="font-montserrat text-white text-xl font-black">{feedbackType === 'Гомдол' ? 'Гомдлын хэсэг' : 'Талархлын хэсэг'}</h2>
+                </div>
+
+                {/* Two cards - Байгууллага / Ажилтан */}
+                <div className="grid grid-cols-2 gap-4 px-4 mb-4">
+                  <button 
+                    onClick={() => setActiveTab(activeTab === 'org' ? 'select' : 'org')}
+                    className={`rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative ${activeTab === 'person' ? 'opacity-40' : ''}`}
+                    style={{ background: 'linear-gradient(135deg, #4A90D9 0%, #357ABD 100%)' }}
+                  >
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Байгууллага</span>
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab(activeTab === 'person' ? 'select' : 'person')}
+                    className={`rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative ${activeTab === 'org' ? 'opacity-40' : ''}`}
+                    style={{ background: 'linear-gradient(135deg, #4A4A5A 0%, #333340 100%)' }}
+                  >
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Ажилтан</span>
+                  </button>
+                </div>
+
+                {activeTab === 'select' && (
+                  <div className="flex items-center gap-2 px-5 mt-1">
+                    <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-[9px] font-bold">!</span>
+                    </div>
+                    <p className="font-poppins text-gray-400 text-[10px]">Тандаа тохирох хэсгээ сонгоно уу?</p>
+                  </div>
+                )}
+
+                {/* Org form - appears below cards */}
+                {activeTab === 'org' && (
+                  <div className="mt-4 animate-fadeIn">
+                    {/* Title */}
+                    <h2 className="font-montserrat text-white text-lg font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Байгууллагад илгээх\nгомдол' : 'Байгууллагад илгээх\nталархал'}</h2>
+
+                    {feedbackType === 'Гомдол' && (
+                    <>
+                    {/* Name input */}
+                    <div className="mx-4 mb-3 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
+                      <input
+                        type="text"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="Таны нэр ..."
+                        className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                      />
+                    </div>
+
+                    {/* Phone input */}
+                    <div className="mx-4 mb-5 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Холбогдох утас ..."
+                        className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                      />
+                    </div>
+                    </>
+                    )}
+
+                    {/* Textarea card */}
+                    <div className="mx-0 mb-4 bg-white rounded-2xl p-4 pb-8">
+                      <p className="font-poppins text-gray-800 text-sm font-bold mb-2">Хүсэлт бичих</p>
+                      <div className="border-t-2 border-gray-400 rounded-t-2xl h-[72px] -mx-4"></div>
                       <textarea
                         value={detail}
                         onChange={(e) => setDetail(e.target.value)}
-                        placeholder="Энд бичнэ үү..."
-                        rows={3}
-                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
+                        placeholder="Энд бичнэ үү ..."
+                        rows={7}
+                        className="w-full font-poppins text-gray-700 text-sm outline-none resize-none placeholder-gray-400 -mt-14"
                       />
-                      <div className="border-t border-[#1A6AD4]"></div>
                     </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
+
+                    {feedbackType === 'Гомдол' ? (
+                    <>
+                    {/* File attachment */}
+                    <div className="mx-0 mb-4">
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Холбогдох баримт, зураг хавсаргах:</p>
                       <input
                         type="file"
                         multiple
                         accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
                         onChange={handleFileSelect}
                         className="hidden"
-                        id="fileUpload1"
+                        id="fileUploadOrg"
                       />
                       <div
-                        onClick={() => document.getElementById('fileUpload1').click()}
-                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
+                        onClick={() => document.getElementById('fileUploadOrg').click()}
+                        className="bg-gray-400 rounded-full px-5 py-3 font-poppins text-white/80 text-base cursor-pointer"
                       >
-                        <Upload size={20} className="text-white mb-1" />
-                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
+                        Attach:
                       </div>
                       {uploadedFiles.length > 0 && (
                         <div className="mt-2 space-y-1.5">
                           {uploadedFiles.map((f) => (
-                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+                            <div key={f.id} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                               {f.preview ? (
                                 <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
                               ) : (
@@ -1575,186 +1855,159 @@ export default function App() {
                           ))}
                         </div>
                       )}
-                      <div className="border-t border-[#1A6AD4] mt-3"></div>
+                    </div>
+                    </>
+                    ) : (
+                    <>
+                    {/* Star rating */}
+                    <div className="mx-0 mb-4 flex justify-center gap-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} onClick={() => setRating(prev => prev === star ? star - 1 : star)} className="transition-all duration-300 hover:scale-125 active:scale-90" style={{ transform: star <= rating ? 'scale(1.1)' : 'scale(1)', filter: star <= rating ? 'drop-shadow(0 0 6px #FFD700)' : 'none' }}>
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill={star <= rating ? '#FFD700' : 'none'} stroke={star <= rating ? '#FFD700' : '#ffffff60'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.3s ease' }}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                    </>
+                    )}
+
+                    {/* Warning */}
+                    {showWarning && (
+                    <div className="mx-0 mb-4 flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-xs font-bold leading-none">!</span>
+                      </div>
+                      <p className="font-poppins text-white/60 text-[11px]">Талбар бүрэн бөглөгдөөгүй байна.</p>
+                    </div>
+                    )}
+
+                    {/* Submit button */}
+                    <div className="mx-0 mt-4 mb-8">
+                      <button onClick={() => { if (!userName.trim() || !phone.trim() || !detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Илгээх</button>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Bottom buttons */}
-                <div className="flex gap-4 px-2">
-                  <button onClick={() => setStep(1)} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
-                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
-                </div>
-              </>
-            ) : (
-            <>
-            {/* ГОМДОЛ / ТАЛАРХАЛ flow */}
-            {activeTab === 'select' ? (
-              <>
-                {/* Toggle cards - АЖИЛТАНД / БАЙГУУЛЛАГТ */}
-                <div className="grid grid-cols-2 gap-4 mb-5 px-2">
-                  <button 
-                    onClick={() => setActiveTab('person')}
-                    className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-between aspect-square transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-3">
-                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">АЖИЛТАНД ТАЛАРХАЛ</p>
-                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">ИЛГЭЭХ</p>
-                    </div>
-                    <span className="relative z-10 font-opensans bg-white rounded-full px-5 py-1.5 text-[9px] font-extrabold text-gray-800 tracking-wider mb-3">АЖИЛТАНД</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('org')}
-                    className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-between aspect-square transition-all hover:scale-[1.02] active:scale-[0.98]"
-                  >
-                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
-                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-3">
-                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">БАЙГУУЛЛАГТ ТАЛАРХАЛ</p>
-                      <p className="font-montserrat text-white text-[12px] font-black tracking-wider text-center uppercase leading-relaxed">ИЛГЭЭХ</p>
-                    </div>
-                    <span className="relative z-10 font-opensans bg-white rounded-full px-5 py-1.5 text-[9px] font-extrabold text-gray-800 tracking-wider mb-3">БАЙГУУЛЛАГТ</span>
-                  </button>
-                </div>
+                {/* Person form - appears below cards */}
+                {activeTab === 'person' && (
+                  <div className="mt-4 animate-fadeIn">
+                    {/* Title */}
+                    <h2 className="font-montserrat text-white text-lg font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Ажилтанд илгээх\nгомдол' : 'Ажилтанд илгээх\nталархал'}</h2>
 
-                {/* Сурталчилгааны баннер */}
-                <div className="mx-2 mb-5">
-                  {renderAdBanner()}
-                </div>
-                {/* Видео зар */}
-                <div className="mx-2 mb-5">
-                  {renderVideoBanner()}
-                </div>
-
-                {/* Bottom button */}
-                <div className="flex justify-center px-2">
-                  <button onClick={() => setStep(1)} className="px-12 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
-                </div>
-              </>
-            ) : activeTab === 'person' ? (
-              <>
-                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
-                {/* Circular wheel carousel */}
-                <div 
-                  ref={wheelRefCallback}
-                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
-                  style={{ height: 220, touchAction: 'none' }}
-                  onTouchStart={handleWheelTouchStart}
-                  onTouchMove={handleWheelTouchMove}
-                  onTouchEnd={handleWheelTouchEnd}
-                  onMouseDown={handleWheelMouseDown}
-                  onMouseMove={handleWheelMouseMove}
-                  onMouseUp={handleWheelMouseUp}
-                  onMouseLeave={handleWheelMouseUp}
-                >
-                  {renderBranchWheel()}
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
-                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
-                </div>
-
-                {/* Main content card */}
-                <div className="rounded-[30px] p-5 mb-5 relative">
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
-                  <div className="space-y-0">
-                    <div className="relative">
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">АЛБАН ТУШААЛ</p>
-                      <div
-                        className="flex items-center justify-between py-2.5 cursor-pointer group"
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
-                      >
-                        <span className={`font-poppins text-[13px] pl-1 ${recipient ? 'text-white' : 'text-white/70'}`}>
-                          {recipient || 'Сонгох...'}
-                        </span>
-                        <ChevronDown size={16} className={`text-white/70 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
-                      </div>
-                      <div className="border-t border-[#1A6AD4]"></div>
-                      {dropdownOpen && (
-                        <div className="absolute left-0 right-0 mt-1 rounded-xl bg-[#003DA0] border border-[#1A6AD4] shadow-2xl z-50 overflow-hidden animate-fadeIn">
-                          {recipients.map((r) => (
-                            <div
-                              key={r}
-                              onClick={() => { setRecipient(r); setDropdownOpen(false); }}
-                              className={`font-poppins px-4 py-3 text-[13px] cursor-pointer transition-all ${
-                                recipient === r
-                                  ? 'bg-[#00B2E7]/20 text-white'
-                                  : 'text-white hover:bg-white/5'
-                              }`}
-                            >
-                              {r}
-                            </div>
-                          ))}
+                    {/* Branch selector - white card with arrows */}
+                    <div className="mx-4 mb-4 bg-white rounded-2xl p-4">
+                      <p className="font-poppins text-gray-800 text-sm font-bold mb-3">Та салбараа сонгоно уу?</p>
+                      <div className="flex items-center gap-3 mt-12 px-8">
+                        <button onClick={() => setSelectedBranch(prev => prev <= 0 ? branches.length - 1 : prev - 1)} className="text-[#0048BA] flex-shrink-0">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        </button>
+                        <div className="flex-1 rounded-2xl overflow-hidden relative bg-gray-100" style={{ aspectRatio: '1/1' }}>
+                          {branchImages[selectedBranch] && (
+                            <img src={branchImages[selectedBranch]} alt={branches[selectedBranch]} className="absolute inset-0 w-full h-full object-cover" />
+                          )}
+                          <div className="absolute inset-0 flex items-end justify-center pb-3">
+                            <span className="font-poppins text-gray-800 text-xs font-bold bg-white rounded-full px-10 py-2">Сонгох</span>
+                          </div>
                         </div>
-                      )}
+                        <button onClick={() => setSelectedBranch(prev => (prev + 1) % branches.length)} className="text-[#0048BA] flex-shrink-0">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                      </div>
+
+                      {/* Selected branch name */}
+                      <p className="font-montserrat text-gray-800 text-sm font-black text-center mt-3">{branches[selectedBranch]} салбар</p>
                     </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
-                      <textarea
-                        value={detail}
-                        onChange={(e) => setDetail(e.target.value)}
-                        placeholder="Энд бичнэ үү..."
-                        rows={3}
-                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
-                      />
-                      <div className="border-t border-[#1A6AD4]"></div>
-                    </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ӨӨРИЙН УТАС</p>
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 8);
-                          setPhone(val);
-                        }}
-                        placeholder="8 оронтой дугаар"
-                        maxLength={8}
-                        inputMode="numeric"
-                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none placeholder-white/40"
-                      />
-                      <div className={`border-t ${phone.length > 0 && phone.length < 8 ? 'border-red-500' : 'border-[#1A6AD4]'}`}></div>
-                      {phone.length > 0 && phone.length < 8 && (
-                        <p className="font-poppins text-red-400 text-[9px] mt-1 pl-1">{8 - phone.length} тэмдэгт дутуу</p>
-                      )}
-                    </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">АЖИЛТНЫ НЭР ЗААВАЛ БИШ</p>
+
+                    {/* Name input */}
+                    <div className="mx-4 mb-3 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                       <input
                         type="text"
                         value={workerName}
                         onChange={(e) => setWorkerName(e.target.value)}
-                        placeholder="Нэр оруулах..."
-                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none placeholder-white/40"
+                        placeholder="Ажилтны нэр ... (Заавал биш)"
+                        className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                       />
-                      <div className="border-t border-[#1A6AD4]"></div>
                     </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
+
+                    {feedbackType === 'Гомдол' && (
+                    <div className="mx-4 mb-5 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                       <input
-                        ref={fileInputRef}
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Холбогдох утас ..."
+                        className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                      />
+                    </div>
+                    )}
+
+                    {/* Position selector */}
+                    <div className="mx-4 mb-4">
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">Албан тушаал</p>
+                      <div className="relative">
+                        <button
+                          onClick={() => setPositionDropdownOpen(!positionDropdownOpen)}
+                          className="w-full bg-white rounded-2xl px-4 py-3 flex items-center justify-between font-poppins text-sm"
+                        >
+                          <span className={selectedPosition ? 'text-gray-800 font-bold' : 'text-gray-400'}>{selectedPosition || 'Сонгох'}</span>
+                          <svg className={`w-4 h-4 text-gray-500 transition-transform ${positionDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        {positionDropdownOpen && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-lg z-10 overflow-hidden">
+                            {positions.map((pos) => (
+                              <button
+                                key={pos}
+                                onClick={() => { setSelectedPosition(pos); setPositionDropdownOpen(false); }}
+                                className={`w-full text-left px-4 py-3 font-poppins text-sm hover:bg-gray-100 transition-colors ${selectedPosition === pos ? 'bg-blue-50 text-[#0048BA] font-bold' : 'text-gray-700'}`}
+                              >
+                                {pos}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Detail textarea - white card */}
+                    <div className="mx-4 mb-4">
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">Дэлгэрэнгүй</p>
+                      <div className="bg-white rounded-2xl p-4 pb-8">
+                        <textarea
+                          value={detail}
+                          onChange={(e) => setDetail(e.target.value)}
+                          placeholder="Энд бичнэ үү..."
+                          rows={6}
+                          className="w-full font-poppins text-gray-700 text-sm outline-none resize-none placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+
+                    {feedbackType === 'Гомдол' ? (
+                    <>
+                    {/* File attachment */}
+                    <div className="mx-4 mb-4">
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Холбогдох баримт, зураг хавсаргах:</p>
+                      <input
                         type="file"
                         multiple
                         accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
                         onChange={handleFileSelect}
                         className="hidden"
+                        id="fileUploadPerson"
                       />
                       <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
+                        onClick={() => document.getElementById('fileUploadPerson').click()}
+                        className="bg-gray-400 rounded-full px-5 py-3 font-poppins text-white/80 text-base cursor-pointer"
                       >
-                        <Upload size={20} className="text-white mb-1" />
-                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
+                        Attach:
                       </div>
                       {uploadedFiles.length > 0 && (
                         <div className="mt-2 space-y-1.5">
                           {uploadedFiles.map((f) => (
-                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
+                            <div key={f.id} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2">
                               {f.preview ? (
                                 <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
                               ) : (
@@ -1769,104 +2022,31 @@ export default function App() {
                           ))}
                         </div>
                       )}
-                      <div className="border-t border-[#1A6AD4] mt-3"></div>
+                    </div>
+                    </>
+                    ) : (
+                    <>
+                    {/* Star rating */}
+                    <div className="mx-4 mb-4 flex justify-center gap-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} onClick={() => setRating(prev => prev === star ? star - 1 : star)} className="transition-all duration-300 hover:scale-125 active:scale-90" style={{ transform: star <= rating ? 'scale(1.1)' : 'scale(1)', filter: star <= rating ? 'drop-shadow(0 0 6px #FFD700)' : 'none' }}>
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill={star <= rating ? '#FFD700' : 'none'} stroke={star <= rating ? '#FFD700' : '#ffffff60'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'all 0.3s ease' }}>
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                    </>
+                    )}
+
+                    {/* Submit button */}
+                    <div className="mx-4 mt-4 mb-8">
+                      <button onClick={() => { if (!detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Илгээх</button>
                     </div>
                   </div>
-                </div>
-
-                {/* Bottom buttons */}
-                <div className="flex gap-4 px-2">
-                  <button onClick={() => setActiveTab('select')} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
-                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
-                </div>
+                )}
               </>
-            ) : (
-              <>
-                <p className="font-poppins text-white text-[13px] font-bold text-center mb-3 tracking-wide">Та хандах гэж байгаа салбараа сонгоно уу</p>
-                {/* Circular wheel carousel */}
-                <div 
-                  ref={wheelRefCallback}
-                  className="rounded-2xl mb-5 mx-1 relative overflow-hidden bg-[#0048BA] cursor-grab active:cursor-grabbing"
-                  style={{ height: 220, touchAction: 'none' }}
-                  onTouchStart={handleWheelTouchStart}
-                  onTouchMove={handleWheelTouchMove}
-                  onTouchEnd={handleWheelTouchEnd}
-                  onMouseDown={handleWheelMouseDown}
-                  onMouseMove={handleWheelMouseMove}
-                  onMouseUp={handleWheelMouseUp}
-                  onMouseLeave={handleWheelMouseUp}
-                >
-                  {renderBranchWheel()}
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0048BA] to-transparent pointer-events-none"></div>
-                  <p className="absolute bottom-3 left-0 right-0 font-montserrat text-white text-[10px] font-black tracking-wider text-center uppercase">{branches[selectedBranch]}</p>
-                </div>
-
-                {/* Main content card */}
-                <div className="rounded-[30px] p-5 mb-5 relative">
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderTop: '1px solid rgba(255,255,255,0.5)', borderBottom: '1px solid rgba(255,255,255,0.5)' }}></div>
-                  <div className="absolute inset-0 rounded-[30px] pointer-events-none" style={{ borderLeft: '1px solid transparent', borderRight: '1px solid transparent', maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0) 45%, rgba(0,0,0,1) 100%)', borderLeftColor: 'rgba(255,255,255,0.5)', borderRightColor: 'rgba(255,255,255,0.5)' }}></div>
-                  <div className="space-y-0">
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase pt-4 pl-1 pb-1">ДЭЛГЭРЭНГҮЙ</p>
-                      <textarea
-                        value={detail}
-                        onChange={(e) => setDetail(e.target.value)}
-                        placeholder="Энд бичнэ үү..."
-                        rows={3}
-                        className="w-full font-poppins bg-transparent text-white text-[13px] py-2 pl-1 outline-none resize-none placeholder-white/40"
-                      />
-                      <div className="border-t border-[#1A6AD4]"></div>
-                    </div>
-                    <div className="h-4"></div>
-                    <div>
-                      <p className="font-poppins text-white/70 text-[11px] font-bold tracking-widest uppercase py-4 pl-1">ФАЙЛ ХАВСАРГАХ</p>
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        id="fileUpload3"
-                      />
-                      <div
-                        onClick={() => document.getElementById('fileUpload3').click()}
-                        className="border border-dashed border-[#1A6AD4] rounded-xl py-5 flex flex-col items-center justify-center cursor-pointer hover:border-[#00B2E7] hover:bg-white/[0.02] transition-all mt-1"
-                      >
-                        <Upload size={20} className="text-white mb-1" />
-                        <p className="font-poppins text-white/70 text-[10px] font-bold">Зураг, видео, аудио, файл</p>
-                      </div>
-                      {uploadedFiles.length > 0 && (
-                        <div className="mt-2 space-y-1.5">
-                          {uploadedFiles.map((f) => (
-                            <div key={f.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2">
-                              {f.preview ? (
-                                <img src={f.preview} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
-                              ) : (
-                                <span className="text-[16px] flex-shrink-0">{getFileIcon(f.type)}</span>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
-                                <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
-                              </div>
-                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <div className="border-t border-[#1A6AD4] mt-3"></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom buttons */}
-                <div className="flex gap-4 px-2">
-                  <button onClick={() => setActiveTab('select')} className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">БУЦАХ</button>
-                  <button className="flex-1 py-3.5 font-opensans bg-white rounded-full font-extrabold text-sm tracking-wider text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">ИЛГЭЭХ</button>
-                </div>
-              </>
-            )}
-            </>
-            )}
+            ) : null}
           </div>
           </div>
           )}

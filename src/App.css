@@ -36,3 +36,51 @@
     transform: rotate(360deg);
   }
 }
+
+/* Success checkmark animations */
+@keyframes checkDraw {
+  0% {
+    stroke-dashoffset: 50;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes circleScaleIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes checkBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.success-circle {
+  animation: circleScaleIn 0.6s ease-out forwards;
+}
+
+.success-check polyline {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkDraw 0.5s ease-out 0.5s forwards;
+}
+
+.success-circle-bounce {
+  animation: checkBounce 2s ease-in-out 1.2s infinite;
+}
