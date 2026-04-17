@@ -1369,7 +1369,7 @@ export default function App() {
 
       <div 
         ref={contentRef}
-        className="relative w-screen h-screen overflow-y-auto transition-transform duration-300 ease-out"
+        className="relative w-screen h-screen lg:max-w-[600px] lg:mx-auto lg:rounded-3xl lg:shadow-2xl overflow-y-auto transition-transform duration-300 ease-out"
         onTouchStart={(e) => { globalSwipeRef.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => {
           if (globalSwipeRef.current === null) return;
@@ -1422,7 +1422,7 @@ export default function App() {
 
                   {/* Avatar display */}
                   <div 
-                    className="w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] lg:w-[300px] lg:h-[300px] mx-2 bg-[#268F5A] rounded-md flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
+                    className="w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] lg:w-[400px] lg:h-[400px] mx-2 bg-[#268F5A] rounded-md flex items-center justify-center select-none cursor-grab active:cursor-grabbing"
                     style={{ transform: `translateX(${swipeY}px)`, transition: isDragging ? 'none' : 'transform 0.3s ease-out' }}
                     onTouchStart={(e) => { touchStartY.current = e.touches[0].clientX; setIsDragging(true); }}
                     onTouchMove={(e) => {
@@ -1489,7 +1489,7 @@ export default function App() {
                 <div className="px-8 pb-6 mt-auto z-10 w-full">
                   <button
                     onClick={() => setStep(2)}
-                    className="font-opensans w-full max-w-[320px] mx-auto block py-4 bg-white rounded-full font-extrabold text-sm lg:text-base tracking-[0.15em] text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all uppercase"
+                    className="font-opensans w-full max-w-[320px] lg:max-w-[480px] mx-auto block py-4 lg:py-5 bg-white rounded-full font-extrabold text-sm lg:text-lg tracking-[0.15em] text-gray-800 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all uppercase"
                   >
                     {'\u04AE\u0420\u0413\u042D\u041B\u0416\u041B\u04AE\u04AE\u041B\u042D\u0425'}
                   </button>
@@ -1545,7 +1545,7 @@ export default function App() {
                   style={{ background: 'linear-gradient(135deg, #4A90D9 0%, #357ABD 100%)' }}
                 >
                   <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
+                  <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
                 {/* Гомдол илгээх */}
                 <button
@@ -1554,7 +1554,7 @@ export default function App() {
                   style={{ background: 'linear-gradient(135deg, #4A4A5A 0%, #333340 100%)' }}
                 >
                   <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0413\u043e\u043c\u0434\u043e\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
+                  <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0413\u043e\u043c\u0434\u043e\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
                 {/* Талархал илгээх */}
                 <button
@@ -1563,7 +1563,7 @@ export default function App() {
                   style={{ background: 'linear-gradient(135deg, #00D4FF 0%, #00B2E7 100%)' }}
                 >
                   <img src="https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                  <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0422\u0430\u043b\u0430\u0440\u0445\u0430\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
+                  <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0422\u0430\u043b\u0430\u0440\u0445\u0430\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
               </div>
             </div>
@@ -1601,7 +1601,7 @@ export default function App() {
               </div>
 
               {/* Title */}
-              <h2 className="font-montserrat text-white text-xl font-black text-center mt-6 mb-5">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0445\u044d\u0441\u044d\u0433`}</h2>
+              <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black text-center mt-6 lg:mt-8 mb-5">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0445\u044d\u0441\u044d\u0433`}</h2>
 
               {/* Name input */}
               <div className="mx-12 mb-3 flex items-center gap-3">
@@ -1690,7 +1690,7 @@ export default function App() {
           {step === 3 && feedbackType !== 'Хүсэлт' && (
           <div className="w-full min-h-screen animate-fadeIn" style={{ backgroundColor: activeTab === 'person' ? '#0048BA' : '#0f0f2e' }}>
 
-            <div className="p-4 sm:p-6 pt-8 sm:pt-10 lg:max-w-[800px] lg:mx-auto lg:pt-12 lg:px-8"
+            <div className="p-4 sm:p-6 pt-8 sm:pt-10"
               onTouchStart={(e) => { feedbackSwipeRef.current = e.touches[0].clientX; }}
               onTouchEnd={(e) => {
                 if (feedbackSwipeRef.current === null) return;
@@ -1739,7 +1739,7 @@ export default function App() {
 
                 {/* Title */}
                 <div className="text-center mt-6 mb-5">
-                  <h2 className="font-montserrat text-white text-xl font-black">{feedbackType === 'Гомдол' ? 'Гомдлын хэсэг' : 'Талархлын хэсэг'}</h2>
+                  <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black">{feedbackType === 'Гомдол' ? 'Гомдлын хэсэг' : 'Талархлын хэсэг'}</h2>
                 </div>
 
                 {/* Two cards - Байгууллага / Ажилтан */}
@@ -1750,7 +1750,7 @@ export default function App() {
                     style={{ background: 'linear-gradient(135deg, #4A90D9 0%, #357ABD 100%)' }}
                   >
                     <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Байгууллага</span>
+                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Байгууллага</span>
                   </button>
                   <button 
                     onClick={() => setActiveTab(activeTab === 'person' ? 'select' : 'person')}
@@ -1758,7 +1758,7 @@ export default function App() {
                     style={{ background: 'linear-gradient(135deg, #4A4A5A 0%, #333340 100%)' }}
                   >
                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="font-poppins text-gray-800 text-sm font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Ажилтан</span>
+                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Ажилтан</span>
                   </button>
                 </div>
 
@@ -1775,7 +1775,7 @@ export default function App() {
                 {activeTab === 'org' && (
                   <div className="mt-4 animate-fadeIn">
                     {/* Title */}
-                    <h2 className="font-montserrat text-white text-lg font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Байгууллагад илгээх\nгомдол' : 'Байгууллагад илгээх\nталархал'}</h2>
+                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Байгууллагад илгээх\nгомдол' : 'Байгууллагад илгээх\nталархал'}</h2>
 
                     {feedbackType === 'Гомдол' && (
                     <>
@@ -1893,7 +1893,7 @@ export default function App() {
                 {activeTab === 'person' && (
                   <div className="mt-4 animate-fadeIn">
                     {/* Title */}
-                    <h2 className="font-montserrat text-white text-lg font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Ажилтанд илгээх\nгомдол' : 'Ажилтанд илгээх\nталархал'}</h2>
+                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Ажилтанд илгээх\nгомдол' : 'Ажилтанд илгээх\nталархал'}</h2>
 
                     {/* Branch selector - white card with arrows */}
                     <div className="mx-4 mb-4 bg-white rounded-2xl p-4">
