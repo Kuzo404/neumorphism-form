@@ -1371,12 +1371,14 @@ export default function App() {
       <div 
         ref={contentRef}
         className="relative w-screen h-screen lg:max-w-[600px] lg:mx-auto lg:rounded-3xl lg:shadow-2xl overflow-y-auto overflow-x-hidden transition-transform duration-300 ease-out"
-        onTouchStart={(e) => { globalSwipeRef.current = e.touches[0].clientX; }}
+        onTouchStart={(e) => { globalSwipeRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
         onTouchEnd={(e) => {
           if (globalSwipeRef.current === null) return;
-          const diff = e.changedTouches[0].clientX - globalSwipeRef.current;
+          const dx = e.changedTouches[0].clientX - globalSwipeRef.current.x;
+          const dy = e.changedTouches[0].clientY - globalSwipeRef.current.y;
           globalSwipeRef.current = null;
-          if (diff > 80) {
+          // Зөвхөн horizontal (baruun) swipe: dx > 130px, мөн horizontal чиглэл давамгайлсан байх
+          if (dx > 130 && Math.abs(dx) > Math.abs(dy) * 2) {
             if (step === 3 && activeTab !== 'select' && feedbackType !== 'Хүсэлт') {
               setActiveTab('select');
             } else if (step === 3) {
