@@ -809,6 +809,7 @@ export default function App() {
   const fileInputRef = useRef(null);
   const feedbackSwipeRef = useRef(null);
   const globalSwipeRef = useRef(null);
+  const branchSwipeRef = useRef(null);
   const feedbackTypesOrder = ['Хүсэлт', 'Гомдол', 'Талархал'];
 
   // Сурталчилгааны өгөгдөл - 3 секунд болгонд солигдоно
@@ -1604,7 +1605,7 @@ export default function App() {
               <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black text-center mt-6 lg:mt-8 mb-5">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0445\u044d\u0441\u044d\u0433`}</h2>
 
               {/* Name input */}
-              <div className="ml-12 mr-20 mb-3 flex items-center gap-3">
+              <div className="ml-12 mr-4 mb-3 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                 <input
                   type="text"
@@ -1616,7 +1617,7 @@ export default function App() {
               </div>
 
               {/* Phone input */}
-              <div className="ml-12 mr-20 mb-5 flex items-center gap-3">
+              <div className="ml-12 mr-4 mb-5 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                 <input
                   type="tel"
@@ -1895,14 +1896,25 @@ export default function App() {
                     {/* Title */}
                     <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Ажилтанд илгээх\nгомдол' : 'Ажилтанд илгээх\nталархал'}</h2>
 
-                    {/* Branch selector - white card with arrows */}
+                    {/* Branch selector - white card with swipe */}
                     <div className="mx-4 mb-4 bg-white rounded-2xl p-4">
                       <p className="font-poppins text-gray-800 text-sm font-bold mb-3">Та салбараа сонгоно уу?</p>
                       <div className="flex items-center gap-3 mt-12 px-8">
                         <button onClick={() => setSelectedBranch(prev => prev <= 0 ? branches.length - 1 : prev - 1)} className="text-[#0048BA] flex-shrink-0">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                         </button>
-                        <div className="flex-1 rounded-2xl overflow-hidden relative bg-gray-100" style={{ aspectRatio: '1/1' }}>
+                        <div
+                          className="flex-1 rounded-2xl overflow-hidden relative bg-gray-100"
+                          style={{ aspectRatio: '1/1' }}
+                          onTouchStart={(e) => { branchSwipeRef.current = e.touches[0].clientX; }}
+                          onTouchEnd={(e) => {
+                            if (branchSwipeRef.current === null) return;
+                            const diff = e.changedTouches[0].clientX - branchSwipeRef.current;
+                            branchSwipeRef.current = null;
+                            if (diff > 40) setSelectedBranch(prev => prev <= 0 ? branches.length - 1 : prev - 1);
+                            else if (diff < -40) setSelectedBranch(prev => (prev + 1) % branches.length);
+                          }}
+                        >
                           {branchImages[selectedBranch] && (
                             <img src={branchImages[selectedBranch]} alt={branches[selectedBranch]} className="absolute inset-0 w-full h-full object-cover" />
                           )}
