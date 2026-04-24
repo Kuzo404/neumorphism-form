@@ -1369,7 +1369,7 @@ export default function App() {
 
       <div 
         ref={contentRef}
-        className="relative w-screen h-screen lg:max-w-[600px] lg:mx-auto lg:rounded-3xl lg:shadow-2xl overflow-y-auto transition-transform duration-300 ease-out"
+        className="relative w-screen h-screen lg:max-w-[600px] lg:mx-auto lg:rounded-3xl lg:shadow-2xl overflow-y-auto overflow-x-hidden transition-transform duration-300 ease-out"
         onTouchStart={(e) => { globalSwipeRef.current = e.touches[0].clientX; }}
         onTouchEnd={(e) => {
           if (globalSwipeRef.current === null) return;
@@ -1611,7 +1611,7 @@ export default function App() {
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder={`\u0422\u0430\u043d\u044b \u043d\u044d\u0440 ...`}
-                  className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                  className="flex-1 min-w-0 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                 />
               </div>
 
@@ -1623,7 +1623,7 @@ export default function App() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder={`\u0425\u043e\u043b\u0431\u043e\u0433\u0434\u043e\u0445 \u0443\u0442\u0430\u0441 ...`}
-                  className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
+                  className="flex-1 min-w-0 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                 />
               </div>
 
