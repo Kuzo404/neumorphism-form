@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+﻿/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, Upload, Check } from 'lucide-react';
 
@@ -7,7 +7,7 @@ import { ChevronDown, Upload, Check } from 'lucide-react';
 const FloatingEmoji = ({ feedbackType }) => {
   const [emojis, setEmojis] = useState([]);
 
-  // Хүсэлт icon SVG
+  // Ð¥Ò¯ÑÑÐ»Ñ‚ icon SVG
   const RequestIcon = () => (
     <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M48 112h288v192H48z" fill="#E3F2FD" stroke="#1976D2" strokeWidth="16"/>
@@ -23,7 +23,7 @@ const FloatingEmoji = ({ feedbackType }) => {
   );
 
   useEffect(() => {
-    // Шинэ emoji үүсгэх
+    // Ð¨Ð¸Ð½Ñ emoji Ò¯Ò¯ÑÐ³ÑÑ…
     const interval = setInterval(() => {
       const id = Date.now();
       const left = Math.random() * 70 + 15; // 15% - 85%
@@ -33,7 +33,7 @@ const FloatingEmoji = ({ feedbackType }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Emoji устгах
+  // Emoji ÑƒÑÑ‚Ð³Ð°Ñ…
   useEffect(() => {
     const cleanup = setInterval(() => {
       setEmojis(prev => prev.filter(e => Date.now() - e.id < 8000));
@@ -41,10 +41,10 @@ const FloatingEmoji = ({ feedbackType }) => {
     return () => clearInterval(cleanup);
   }, []);
 
-  // Emoji сонгох
+  // Emoji ÑÐ¾Ð½Ð³Ð¾Ñ…
   const getEmoji = () => {
-    if (feedbackType === 'Талархал') return <span className="text-3xl">😊</span>;
-    if (feedbackType === 'Гомдол') return <span className="text-3xl">😢</span>;
+    if (feedbackType === 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»') return <span className="text-3xl">ðŸ˜Š</span>;
+    if (feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»') return <span className="text-3xl">ðŸ˜¢</span>;
     return <RequestIcon />;
   };
 
@@ -91,22 +91,22 @@ const FloatingEmoji = ({ feedbackType }) => {
 const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
   // Mood-based expression helpers
   const getMouthPath = (baseY, type) => {
-    if (mood === 'Гомдол') {
-      // Уурласан - доошоо муруй, бага зэрэг нээлттэй
+    if (mood === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»') {
+      // Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ - Ð´Ð¾Ð¾ÑˆÐ¾Ð¾ Ð¼ÑƒÑ€ÑƒÐ¹, Ð±Ð°Ð³Ð° Ð·ÑÑ€ÑÐ³ Ð½ÑÑÐ»Ñ‚Ñ‚ÑÐ¹
       return `M 85 ${baseY + 2} Q 100 ${baseY - 8} 115 ${baseY + 2}`;
-    } else if (mood === 'Талархал') {
-      // Баяртай - том инээмсэглэл
+    } else if (mood === 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»') {
+      // Ð‘Ð°ÑÑ€Ñ‚Ð°Ð¹ - Ñ‚Ð¾Ð¼ Ð¸Ð½ÑÑÐ¼ÑÑÐ³Ð»ÑÐ»
       return `M 82 ${baseY - 5} Q 100 ${baseY + 15} 118 ${baseY - 5}`;
     } else {
-      // Хүсэлт / neutral - жижиг инээмсэглэл
+      // Ð¥Ò¯ÑÑÐ»Ñ‚ / neutral - Ð¶Ð¸Ð¶Ð¸Ð³ Ð¸Ð½ÑÑÐ¼ÑÑÐ³Ð»ÑÐ»
       return `M 88 ${baseY} Q 100 ${baseY + 8} 112 ${baseY}`;
     }
   };
 
   const getEyeStyle = () => {
-    if (mood === 'Гомдол') {
+    if (mood === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»') {
       return { eyeHeight: 10, pupilSize: 5, eyebrowAngle: 'angry' };
-    } else if (mood === 'Талархал') {
+    } else if (mood === 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»') {
       return { eyeHeight: 8, pupilSize: 5, eyebrowAngle: 'happy', closed: true };
     } else {
       return { eyeHeight: 12, pupilSize: 5, eyebrowAngle: 'neutral' };
@@ -114,24 +114,24 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
   };
 
   const eyeStyle = getEyeStyle();
-  const isHappy = mood === 'Талархал';
-  const isAngry = mood === 'Гомдол';
+  const isHappy = mood === 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»';
+  const isAngry = mood === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»';
 
   const characterStyles = {
-    1: ( // Эрэгтэй - Business Professional (костюмтай)
+    1: ( // Ð­Ñ€ÑÐ³Ñ‚ÑÐ¹ - Business Professional (ÐºÐ¾ÑÑ‚ÑŽÐ¼Ñ‚Ð°Ð¹)
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Үс */}
+        {/* Ò®Ñ */}
         <ellipse cx="100" cy="55" rx="52" ry="30" fill="#2C1810" />
         <path d="M 48 70 Q 48 30 100 25 Q 152 30 152 70" fill="#2C1810" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="85" rx="45" ry="50" fill="#E8C39E" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="55" cy="85" rx="8" ry="12" fill="#E8C39E" />
         <ellipse cx="145" cy="85" rx="8" ry="12" fill="#E8C39E" />
-        {/* Хөмсөг - mood-д суурилсан */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ - mood-Ð´ ÑÑƒÑƒÑ€Ð¸Ð»ÑÐ°Ð½ */}
         {isAngry ? (
           <>
-            {/* Уурласан хөмсөг - дотогшоо чиглэсэн */}
+            {/* Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ Ñ…Ó©Ð¼ÑÓ©Ð³ - Ð´Ð¾Ñ‚Ð¾Ð³ÑˆÐ¾Ð¾ Ñ‡Ð¸Ð³Ð»ÑÑÑÐ½ */}
             <path d="M 70 68 Q 80 62 90 66" stroke="#2C1810" strokeWidth="3" fill="none" />
             <path d="M 110 66 Q 120 62 130 68" stroke="#2C1810" strokeWidth="3" fill="none" />
           </>
@@ -141,7 +141,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 110 65 Q 120 60 130 65" stroke="#2C1810" strokeWidth="3" fill="none" />
           </>
         )}
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 70 80 Q 80 72 90 80" stroke="#4A3728" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -157,33 +157,33 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг - гомдолд */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ - Ð³Ð¾Ð¼Ð´Ð¾Ð»Ð´ */}
         {isAngry && (
           <>
-            {/* Духан дээрх уурын судас */}
+            {/* Ð”ÑƒÑ…Ð°Ð½ Ð´ÑÑÑ€Ñ… ÑƒÑƒÑ€Ñ‹Ð½ ÑÑƒÐ´Ð°Ñ */}
             <g className="animate-pulse">
               <path d="M 140 55 L 145 60 M 145 55 L 140 60" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" />
               <path d="M 142 57 L 147 62 M 147 57 L 142 62" stroke="#E53E3E" strokeWidth="1.5" strokeLinecap="round" />
             </g>
-            {/* Хацар улайсан */}
+            {/* Ð¥Ð°Ñ†Ð°Ñ€ ÑƒÐ»Ð°Ð¹ÑÐ°Ð½ */}
             <ellipse cx="65" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
             <ellipse cx="135" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
           </>
         )}
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 85 L 97 100 Q 100 105 103 100 L 100 85" fill="#D4A574" />
-        {/* Ам - mood-д суурилсан */}
+        {/* ÐÐ¼ - mood-Ð´ ÑÑƒÑƒÑ€Ð¸Ð»ÑÐ°Ð½ */}
         <path d={getMouthPath(115, 1)} stroke={isHappy ? "#E57373" : "#C4846C"} strokeWidth={isHappy ? "4" : "3"} fill={isHappy ? "#FFE4E1" : "none"} strokeLinecap="round" />
-        {/* Хацар - баяртай үед */}
+        {/* Ð¥Ð°Ñ†Ð°Ñ€ - Ð±Ð°ÑÑ€Ñ‚Ð°Ð¹ Ò¯ÐµÐ´ */}
         {isHappy && (
           <>
             <ellipse cx="65" cy="95" rx="10" ry="6" fill="#FFB6C1" opacity="0.5" />
             <ellipse cx="135" cy="95" rx="10" ry="6" fill="#FFB6C1" opacity="0.5" />
           </>
         )}
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <rect x="88" y="130" width="24" height="20" fill="#E8C39E" />
-        {/* Костюм */}
+        {/* ÐšÐ¾ÑÑ‚ÑŽÐ¼ */}
         <path d="M 40 150 L 60 145 L 88 150 L 88 220 L 40 220 Z" fill="#1a365d" />
         <path d="M 160 150 L 140 145 L 112 150 L 112 220 L 160 220 Z" fill="#1a365d" />
         <path d="M 88 150 L 112 150 L 112 220 L 88 220 Z" fill="white" />
@@ -191,22 +191,22 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <rect x="96" y="175" width="8" height="40" fill="#c53030" />
       </svg>
     ),
-    2: ( // Эмэгтэй - Professional Woman
+    2: ( // Ð­Ð¼ÑÐ³Ñ‚ÑÐ¹ - Professional Woman
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Урт үс */}
+        {/* Ð£Ñ€Ñ‚ Ò¯Ñ */}
         <path d="M 45 60 Q 40 120 50 180 L 70 180 Q 60 120 65 70 Z" fill="#8B4513" />
         <path d="M 155 60 Q 160 120 150 180 L 130 180 Q 140 120 135 70 Z" fill="#8B4513" />
         <ellipse cx="100" cy="50" rx="55" ry="25" fill="#8B4513" />
         <path d="M 45 55 Q 45 30 100 20 Q 155 30 155 55 Q 155 70 145 75 L 55 75 Q 45 70 45 55" fill="#8B4513" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="85" rx="42" ry="48" fill="#FFDAB9" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="58" cy="85" rx="6" ry="10" fill="#FFDAB9" />
         <ellipse cx="142" cy="85" rx="6" ry="10" fill="#FFDAB9" />
-        {/* Хөмсөг */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ */}
         {isAngry ? (
           <>
-            {/* Уурласан хөмсөг - дотогшоо чиглэсэн */}
+            {/* Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ Ñ…Ó©Ð¼ÑÓ©Ð³ - Ð´Ð¾Ñ‚Ð¾Ð³ÑˆÐ¾Ð¾ Ñ‡Ð¸Ð³Ð»ÑÑÑÐ½ */}
             <path d="M 72 70 Q 80 64 88 68" stroke="#5D4037" strokeWidth="2" fill="none" />
             <path d="M 112 68 Q 120 64 128 70" stroke="#5D4037" strokeWidth="2" fill="none" />
           </>
@@ -216,7 +216,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 112 68 Q 120 64 128 68" stroke="#5D4037" strokeWidth="2" fill="none" />
           </>
         )}
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 71 80 Q 80 72 89 80" stroke="#3D2314" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -232,7 +232,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ */}
         {isAngry && (
           <>
             <g className="animate-pulse">
@@ -242,12 +242,12 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <ellipse cx="135" cy="95" rx="8" ry="5" fill="#E53E3E" opacity="0.3" />
           </>
         )}
-        {/* Сормуус */}
+        {/* Ð¡Ð¾Ñ€Ð¼ÑƒÑƒÑ */}
         <path d="M 71 75 L 68 72 M 75 73 L 73 69 M 85 73 L 87 69 M 89 75 L 92 72" stroke="#3D2314" strokeWidth="1" />
         <path d="M 111 75 L 108 72 M 115 73 L 113 69 M 125 73 L 127 69 M 129 75 L 132 72" stroke="#3D2314" strokeWidth="1" />
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 85 L 98 98 Q 100 102 102 98 L 100 85" fill="#F0C8A0" />
-        {/* Уруул */}
+        {/* Ð£Ñ€ÑƒÑƒÐ» */}
         {isHappy ? (
           <>
             <ellipse cx="100" cy="115" rx="14" ry="7" fill="#E57373" />
@@ -261,34 +261,34 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 88 115 Q 100 112 112 115" stroke="#D32F2F" strokeWidth="1" fill="none" />
           </>
         )}
-        {/* Хацар */}
+        {/* Ð¥Ð°Ñ†Ð°Ñ€ */}
         {isHappy && (
           <>
             <ellipse cx="65" cy="95" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
             <ellipse cx="135" cy="95" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
           </>
         )}
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <path d="M 90 130 L 90 155 L 110 155 L 110 130" fill="#FFDAB9" />
-        {/* Хувцас */}
+        {/* Ð¥ÑƒÐ²Ñ†Ð°Ñ */}
         <path d="M 50 155 Q 70 145 100 150 Q 130 145 150 155 L 150 220 L 50 220 Z" fill="#5C6BC0" />
         <ellipse cx="100" cy="155" rx="25" ry="12" fill="#FFDAB9" />
       </svg>
     ),
-    3: ( // Эрэгтэй - Casual Developer
+    3: ( // Ð­Ñ€ÑÐ³Ñ‚ÑÐ¹ - Casual Developer
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Үс */}
+        {/* Ò®Ñ */}
         <path d="M 55 65 Q 55 35 100 30 Q 145 35 145 65 L 140 70 L 60 70 Z" fill="#1a1a1a" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="85" rx="43" ry="48" fill="#D4A574" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="57" cy="85" rx="7" ry="11" fill="#D4A574" />
         <ellipse cx="143" cy="85" rx="7" ry="11" fill="#D4A574" />
-        {/* Шил frame */}
+        {/* Ð¨Ð¸Ð» frame */}
         <rect x="65" y="70" width="30" height="22" rx="4" fill="none" stroke="#333" strokeWidth="3" />
         <rect x="105" y="70" width="30" height="22" rx="4" fill="none" stroke="#333" strokeWidth="3" />
         <line x1="95" y1="81" x2="105" y2="81" stroke="#333" strokeWidth="3" />
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 70 80 Q 80 73 90 80" stroke="#2E7D32" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -304,7 +304,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.4} cy={78 + eyePosition.y * 0.4} r="1.5" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ */}
         {isAngry && (
           <>
             <g className="animate-pulse">
@@ -314,10 +314,10 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <ellipse cx="135" cy="98" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
-        {/* Хөмсөг */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ */}
         {isAngry ? (
           <>
-            {/* Уурласан хөмсөг */}
+            {/* Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ Ñ…Ó©Ð¼ÑÓ©Ð³ */}
             <path d="M 68 67 Q 80 62 92 65" stroke="#1a1a1a" strokeWidth="2" fill="none" />
             <path d="M 108 65 Q 120 62 132 67" stroke="#1a1a1a" strokeWidth="2" fill="none" />
           </>
@@ -327,20 +327,20 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 108 65 Q 120 62 132 65" stroke="#1a1a1a" strokeWidth="2" fill="none" />
           </>
         )}
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 88 L 97 102 Q 100 106 103 102 L 100 88" fill="#C49A6C" />
-        {/* Ам */}
+        {/* ÐÐ¼ */}
         <path d={getMouthPath(118, 3)} stroke="#8D6E63" strokeWidth="2.5" fill={isHappy ? "#FFE4E1" : "none"} strokeLinecap="round" />
-        {/* Хацар */}
+        {/* Ð¥Ð°Ñ†Ð°Ñ€ */}
         {isHappy && (
           <>
             <ellipse cx="65" cy="98" rx="8" ry="5" fill="#FFB6C1" opacity="0.5" />
             <ellipse cx="135" cy="98" rx="8" ry="5" fill="#FFB6C1" opacity="0.5" />
           </>
         )}
-        {/* Сахал */}
+        {/* Ð¡Ð°Ñ…Ð°Ð» */}
         <ellipse cx="100" cy="125" rx="18" ry="8" fill="#1a1a1a" opacity="0.3" />
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <rect x="90" y="130" width="20" height="20" fill="#D4A574" />
         {/* Hoodie */}
         <path d="M 45 150 Q 70 140 100 145 Q 130 140 155 150 L 155 220 L 45 220 Z" fill="#455A64" />
@@ -349,26 +349,26 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         <line x1="110" y1="155" x2="110" y2="190" stroke="#263238" strokeWidth="2" />
       </svg>
     ),
-    4: ( // Эмэгтэй - Найрсаг Оффис Ажилтан
+    4: ( // Ð­Ð¼ÑÐ³Ñ‚ÑÐ¹ - ÐÐ°Ð¹Ñ€ÑÐ°Ð³ ÐžÑ„Ñ„Ð¸Ñ ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Ponytail үс */}
+        {/* Ponytail Ò¯Ñ */}
         <ellipse cx="100" cy="45" rx="48" ry="20" fill="#4A2C2A" />
         <path d="M 52 50 Q 50 70 55 85 L 68 75 L 65 55 Z" fill="#4A2C2A" />
         <path d="M 148 50 Q 150 70 145 85 L 132 75 L 135 55 Z" fill="#4A2C2A" />
         <path d="M 140 45 Q 165 50 170 90 Q 175 140 160 170" stroke="#4A2C2A" strokeWidth="18" fill="none" strokeLinecap="round" />
         <ellipse cx="158" cy="175" rx="8" ry="12" fill="#4A2C2A" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="82" rx="40" ry="45" fill="#FFDBAC" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="60" cy="82" rx="6" ry="9" fill="#FFDBAC" />
         <ellipse cx="140" cy="82" rx="6" ry="9" fill="#FFDBAC" />
-        {/* Ээмэг */}
+        {/* Ð­ÑÐ¼ÑÐ³ */}
         <circle cx="60" cy="92" r="3" fill="#FF69B4" />
         <circle cx="140" cy="92" r="3" fill="#FF69B4" />
-        {/* Хөмсөг */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ */}
         {isAngry ? (
           <>
-            {/* Уурласан хөмсөг */}
+            {/* Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ Ñ…Ó©Ð¼ÑÓ©Ð³ */}
             <path d="M 73 70 Q 82 65 91 68" stroke="#4A2C2A" strokeWidth="2" fill="none" />
             <path d="M 109 68 Q 118 65 127 70" stroke="#4A2C2A" strokeWidth="2" fill="none" />
           </>
@@ -378,7 +378,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 109 68 Q 118 65 127 68" stroke="#4A2C2A" strokeWidth="2" fill="none" />
           </>
         )}
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 72 80 Q 82 72 92 80" stroke="#5D4037" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -394,7 +394,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={116 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2.5" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ */}
         {isAngry && (
           <>
             <g className="animate-pulse">
@@ -402,15 +402,15 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             </g>
           </>
         )}
-        {/* Сормуус */}
+        {/* Ð¡Ð¾Ñ€Ð¼ÑƒÑƒÑ */}
         <path d="M 72 74 L 69 70 M 77 72 L 75 68 M 87 72 L 89 68 M 92 74 L 95 70" stroke="#4A2C2A" strokeWidth="1.5" />
         <path d="M 108 74 L 105 70 M 113 72 L 111 68 M 123 72 L 125 68 M 128 74 L 131 70" stroke="#4A2C2A" strokeWidth="1.5" />
-        {/* Улаан хацар */}
+        {/* Ð£Ð»Ð°Ð°Ð½ Ñ…Ð°Ñ†Ð°Ñ€ */}
         <ellipse cx="68" cy="95" rx="8" ry="5" fill="#FFB6C1" opacity={isHappy ? "0.7" : "0.5"} />
         <ellipse cx="132" cy="95" rx="8" ry="5" fill="#FFB6C1" opacity={isHappy ? "0.7" : "0.5"} />
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 85 L 98 98 Q 100 101 102 98 L 100 85" fill="#F0C8A0" />
-        {/* Ам */}
+        {/* ÐÐ¼ */}
         {isHappy ? (
           <>
             <path d="M 82 108 Q 100 128 118 108" stroke="#E57373" strokeWidth="3" fill="#FFE4E1" strokeLinecap="round" />
@@ -424,35 +424,35 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 90 112 Q 100 118 110 112" fill="#FFF" />
           </>
         )}
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <path d="M 90 125 L 90 148 L 110 148 L 110 125" fill="#FFDBAC" />
         <circle cx="100" cy="142" r="4" fill="#FF69B4" />
-        {/* Блузка */}
+        {/* Ð‘Ð»ÑƒÐ·ÐºÐ° */}
         <path d="M 50 148 Q 75 140 100 145 Q 125 140 150 148 L 150 220 L 50 220 Z" fill="#FF7043" />
         <ellipse cx="100" cy="152" rx="22" ry="10" fill="#FFDBAC" />
         <circle cx="100" cy="170" r="3" fill="#BF360C" />
         <circle cx="100" cy="185" r="3" fill="#BF360C" />
       </svg>
     ),
-    5: ( // Эмэгтэй - Designer/Creative
+    5: ( // Ð­Ð¼ÑÐ³Ñ‚ÑÐ¹ - Designer/Creative
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Өнгөлөг үс */}
+        {/* Ó¨Ð½Ð³Ó©Ð»Ó©Ð³ Ò¯Ñ */}
         <ellipse cx="100" cy="48" rx="52" ry="24" fill="#9C27B0" />
         <path d="M 48 55 Q 45 90 55 130 L 75 100 L 70 60 Z" fill="#9C27B0" />
         <path d="M 152 55 Q 155 90 145 130 L 125 100 L 130 60 Z" fill="#9C27B0" />
         <path d="M 70 50 Q 60 20 80 15 Q 100 10 100 30" fill="#E91E63" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="82" rx="38" ry="43" fill="#FFECD2" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="62" cy="82" rx="5" ry="9" fill="#FFECD2" />
         <ellipse cx="138" cy="82" rx="5" ry="9" fill="#FFECD2" />
-        {/* Ээмэг */}
+        {/* Ð­ÑÐ¼ÑÐ³ */}
         <circle cx="62" cy="95" r="4" fill="#FFD700" />
         <circle cx="138" cy="95" r="4" fill="#FFD700" />
-        {/* Хөмсөг */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ */}
         {isAngry ? (
           <>
-            {/* Уурласан хөмсөг */}
+            {/* Ð£ÑƒÑ€Ð»Ð°ÑÐ°Ð½ Ñ…Ó©Ð¼ÑÓ©Ð³ */}
             <path d="M 75 68 Q 83 63 91 66" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
             <path d="M 109 66 Q 117 63 125 68" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
           </>
@@ -462,7 +462,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 109 68 Q 117 64 125 68" stroke="#6D4C41" strokeWidth="1.5" fill="none" />
           </>
         )}
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 73 78 Q 83 70 93 78" stroke="#7B1FA2" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -478,7 +478,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={115 + eyePosition.x * 0.5} cy={76 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ */}
         {isAngry && (
           <>
             <g className="animate-pulse">
@@ -488,12 +488,12 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <ellipse cx="125" cy="92" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
-        {/* Сормуус */}
+        {/* Ð¡Ð¾Ñ€Ð¼ÑƒÑƒÑ */}
         <path d="M 75 73 L 72 70 M 79 71 L 77 67 M 87 71 L 89 67 M 91 73 L 94 70" stroke="#4A148C" strokeWidth="1" />
         <path d="M 109 73 L 106 70 M 113 71 L 111 67 M 121 71 L 123 67 M 125 73 L 128 70" stroke="#4A148C" strokeWidth="1" />
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 83 L 98 95 Q 100 98 102 95 L 100 83" fill="#FFD4A8" />
-        {/* Уруул */}
+        {/* Ð£Ñ€ÑƒÑƒÐ» */}
         {isHappy ? (
           <ellipse cx="100" cy="108" rx="12" ry="7" fill="#EC407A" />
         ) : isAngry ? (
@@ -501,32 +501,32 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
         ) : (
           <ellipse cx="100" cy="108" rx="10" ry="5" fill="#EC407A" />
         )}
-        {/* Хацар */}
+        {/* Ð¥Ð°Ñ†Ð°Ñ€ */}
         {isHappy && (
           <>
             <ellipse cx="68" cy="92" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
             <ellipse cx="132" cy="92" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
           </>
         )}
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <path d="M 92 122 L 92 145 L 108 145 L 108 122" fill="#FFECD2" />
         <ellipse cx="100" cy="140" rx="4" ry="6" fill="#FFD700" />
-        {/* Creative хувцас */}
+        {/* Creative Ñ…ÑƒÐ²Ñ†Ð°Ñ */}
         <path d="M 55 145 Q 78 138 100 142 Q 122 138 145 145 L 150 220 L 50 220 Z" fill="#FF4081" />
         <path d="M 70 155 L 75 220" stroke="#F8BBD9" strokeWidth="3" />
         <path d="M 130 155 L 125 220" stroke="#F8BBD9" strokeWidth="3" />
       </svg>
     ),
-    6: ( // Эрэгтэй - Technical Expert
+    6: ( // Ð­Ñ€ÑÐ³Ñ‚ÑÐ¹ - Technical Expert
       <svg viewBox="0 0 200 280" className={`w-full h-full ${isHappy ? 'animate-bounce-slow' : ''}`}>
-        {/* Үс */}
+        {/* Ò®Ñ */}
         <path d="M 58 65 Q 58 40 100 35 Q 142 40 142 65 L 138 72 L 62 72 Z" fill="#5D4037" />
-        {/* Толгой */}
+        {/* Ð¢Ð¾Ð»Ð³Ð¾Ð¹ */}
         <ellipse cx="100" cy="85" rx="42" ry="47" fill="#DEB887" />
-        {/* Чих */}
+        {/* Ð§Ð¸Ñ… */}
         <ellipse cx="58" cy="85" rx="7" ry="11" fill="#DEB887" />
         <ellipse cx="142" cy="85" rx="7" ry="11" fill="#DEB887" />
-        {/* Хөмсөг */}
+        {/* Ð¥Ó©Ð¼ÑÓ©Ð³ */}
         {isAngry ? (
           <>
             <path d="M 70 66 Q 80 70 90 68" stroke="#3E2723" strokeWidth="2.5" fill="none" />
@@ -538,7 +538,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <path d="M 110 68 Q 120 64 130 68" stroke="#3E2723" strokeWidth="2.5" fill="none" />
           </>
         )}
-        {/* Нүд */}
+        {/* ÐÒ¯Ð´ */}
         {isHappy ? (
           <>
             <path d="M 70 80 Q 80 72 90 80" stroke="#1565C0" strokeWidth="3" fill="none" strokeLinecap="round" />
@@ -554,7 +554,7 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <circle cx={118 + eyePosition.x * 0.5} cy={78 + eyePosition.y * 0.5} r="2" fill="white" />
           </>
         )}
-        {/* Уурын тэмдэг */}
+        {/* Ð£ÑƒÑ€Ñ‹Ð½ Ñ‚ÑÐ¼Ð´ÑÐ³ */}
         {isAngry && (
           <>
             <g className="animate-pulse">
@@ -564,20 +564,20 @@ const renderCharacter = (selectedAvatar, eyePosition, mood = 'neutral') => {
             <ellipse cx="128" cy="95" rx="6" ry="4" fill="#E53E3E" opacity="0.3" />
           </>
         )}
-        {/* Хамар */}
+        {/* Ð¥Ð°Ð¼Ð°Ñ€ */}
         <path d="M 100 85 L 96 102 Q 100 107 104 102 L 100 85" fill="#C9A66B" />
-        {/* Ам */}
+        {/* ÐÐ¼ */}
         <path d={getMouthPath(115, 6)} stroke="#8D6E63" strokeWidth="2" fill={isHappy ? "#FFE4E1" : "none"} strokeLinecap="round" />
-        {/* Хацар */}
+        {/* Ð¥Ð°Ñ†Ð°Ñ€ */}
         {isHappy && (
           <>
             <ellipse cx="65" cy="98" rx="10" ry="6" fill="#FFB6C1" opacity="0.5" />
             <ellipse cx="135" cy="98" rx="10" ry="6" fill="#FFB6C1" opacity="0.5" />
           </>
         )}
-        {/* Хүзүү */}
+        {/* Ð¥Ò¯Ð·Ò¯Ò¯ */}
         <rect x="90" y="130" width="20" height="18" fill="#DEB887" />
-        {/* Цамц + халат */}
+        {/* Ð¦Ð°Ð¼Ñ† + Ñ…Ð°Ð»Ð°Ñ‚ */}
         <path d="M 48 148 Q 74 140 100 145 Q 126 140 152 148 L 152 220 L 48 220 Z" fill="white" />
         <path d="M 48 148 L 65 145 L 65 220 L 48 220 Z" fill="#1976D2" />
         <path d="M 152 148 L 135 145 L 135 220 L 152 220 Z" fill="#1976D2" />
@@ -713,7 +713,7 @@ const EyeTracker = ({ selectedAvatar, mood = 'neutral' }) => {
   return (
     <div 
       ref={eyeContainerRef}
-      className={`relative w-32 h-40 mx-auto mb-4 sm:mb-8 mt-4 sm:mt-0 flex items-center justify-center ${mood === 'Талархал' ? 'animate-character-happy' : ''}`}
+      className={`relative w-32 h-40 mx-auto mb-4 sm:mb-8 mt-4 sm:mt-0 flex items-center justify-center ${mood === 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»' ? 'animate-character-happy' : ''}`}
     >
       {renderCharacter(selectedAvatar, eyePosition, mood)}
     </div>
@@ -756,7 +756,7 @@ const CustomSelect = ({ options, value, onChange, placeholder, icon: Icon }) => 
 
       {isOpen && (
         <div className="absolute z-50 top-full left-0 w-full mt-2 bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden animate-fadeIn border border-white/60">
-          {/* ЭНД ӨӨРЧЛӨЛТ ОРОВ: max-h-56 байсныг max-h-[155px] болгов */}
+          {/* Ð­ÐÐ” Ó¨Ó¨Ð Ð§Ð›Ó¨Ð›Ð¢ ÐžÐ ÐžÐ’: max-h-56 Ð±Ð°Ð¹ÑÐ½Ñ‹Ð³ max-h-[155px] Ð±Ð¾Ð»Ð³Ð¾Ð² */}
           <div className="max-h-[155px] overflow-y-auto custom-scrollbar p-2 space-y-1">
             {options.map((option, index) => (
               <div 
@@ -786,7 +786,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('select'); 
   const [step, setStep] = useState(1); 
   const [rating, setRating] = useState(0);
-  const [feedbackType, setFeedbackType] = useState('Хүсэлт'); 
+  const [feedbackType, setFeedbackType] = useState('Ð¥Ò¯ÑÑÐ»Ñ‚'); 
   const [branch, setBranch] = useState(''); // eslint-disable-line no-unused-vars
   const [selectedBranch, setSelectedBranch] = useState(0);
   const [wheelAngle, setWheelAngle] = useState(0);
@@ -805,19 +805,19 @@ export default function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedPosition, setSelectedPosition] = useState('');
   const [positionDropdownOpen, setPositionDropdownOpen] = useState(false);
-  const positions = ['Менежер', 'Салбарын захирал', 'Хүний нөөц', 'Маркетинг алба', 'Бусад'];
+  const positions = ['ÐœÐµÐ½ÐµÐ¶ÐµÑ€', 'Ð¡Ð°Ð»Ð±Ð°Ñ€Ñ‹Ð½ Ð·Ð°Ñ…Ð¸Ñ€Ð°Ð»', 'Ð¥Ò¯Ð½Ð¸Ð¹ Ð½Ó©Ó©Ñ†', 'ÐœÐ°Ñ€ÐºÐµÑ‚Ð¸Ð½Ð³ Ð°Ð»Ð±Ð°', 'Ð‘ÑƒÑÐ°Ð´'];
   const fileInputRef = useRef(null);
   const feedbackSwipeRef = useRef(null);
   const globalSwipeRef = useRef(null);
   const branchSwipeRef = useRef(null);
-  const feedbackTypesOrder = ['Хүсэлт', 'Гомдол', 'Талархал'];
+  const feedbackTypesOrder = ['Ð¥Ò¯ÑÑÐ»Ñ‚', 'Ð“Ð¾Ð¼Ð´Ð¾Ð»', 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»'];
 
-  // Сурталчилгааны өгөгдөл - 3 секунд болгонд солигдоно
+  // Ð¡ÑƒÑ€Ñ‚Ð°Ð»Ñ‡Ð¸Ð»Ð³Ð°Ð°Ð½Ñ‹ Ó©Ð³Ó©Ð³Ð´Ó©Ð» - 3 ÑÐµÐºÑƒÐ½Ð´ Ð±Ð¾Ð»Ð³Ð¾Ð½Ð´ ÑÐ¾Ð»Ð¸Ð³Ð´Ð¾Ð½Ð¾
   const [adIndex, setAdIndex] = useState(0);
   const ads = [
-    { label: 'ББСБ', title: 'Хэрэглээний зээл хялбар нөхцөлөөр', range: '₮500,000 - ₮10,000,000', rate: '2.9', unit: '% /сар', btn: 'ЗЭЭЛ АВАХ', gradient: 'from-[#003080] to-[#0050B0]', accent: 'from-[#00B2E7] to-[#0090C0]', img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=400&fit=crop' },
-    { label: 'ДААТГАЛ', title: 'Эрүүл мэндийн даатгал хямд үнээр', range: '₮50,000 - ₮500,000 /сар', rate: '15', unit: '% хөнгөлөлт', btn: 'БҮРТГҮҮЛЭХ', gradient: 'from-[#2d0080] to-[#5a30b0]', accent: 'from-[#9C27B0] to-[#7B1FA2]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=400&fit=crop' },
-    { label: 'ХАДГАЛАМЖ', title: 'Хугацаатай хадгаламж өндөр хүүтэй', range: '₮1,000,000 - ₮50,000,000', rate: '12.5', unit: '% /жил', btn: 'ДЭЛГЭРЭНГҮЙ', gradient: 'from-[#006040] to-[#008060]', accent: 'from-[#00C853] to-[#009624]', img: 'https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=400&h=400&fit=crop' },
+    { label: 'Ð‘Ð‘Ð¡Ð‘', title: 'Ð¥ÑÑ€ÑÐ³Ð»ÑÑÐ½Ð¸Ð¹ Ð·ÑÑÐ» Ñ…ÑÐ»Ð±Ð°Ñ€ Ð½Ó©Ñ…Ñ†Ó©Ð»Ó©Ó©Ñ€', range: 'â‚®500,000 - â‚®10,000,000', rate: '2.9', unit: '% /ÑÐ°Ñ€', btn: 'Ð—Ð­Ð­Ð› ÐÐ’ÐÐ¥', gradient: 'from-[#003080] to-[#0050B0]', accent: 'from-[#00B2E7] to-[#0090C0]', img: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=400&fit=crop' },
+    { label: 'Ð”ÐÐÐ¢Ð“ÐÐ›', title: 'Ð­Ñ€Ò¯Ò¯Ð» Ð¼ÑÐ½Ð´Ð¸Ð¹Ð½ Ð´Ð°Ð°Ñ‚Ð³Ð°Ð» Ñ…ÑÐ¼Ð´ Ò¯Ð½ÑÑÑ€', range: 'â‚®50,000 - â‚®500,000 /ÑÐ°Ñ€', rate: '15', unit: '% Ñ…Ó©Ð½Ð³Ó©Ð»Ó©Ð»Ñ‚', btn: 'Ð‘Ò®Ð Ð¢Ð“Ò®Ò®Ð›Ð­Ð¥', gradient: 'from-[#2d0080] to-[#5a30b0]', accent: 'from-[#9C27B0] to-[#7B1FA2]', img: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400&h=400&fit=crop' },
+    { label: 'Ð¥ÐÐ”Ð“ÐÐ›ÐÐœÐ–', title: 'Ð¥ÑƒÐ³Ð°Ñ†Ð°Ð°Ñ‚Ð°Ð¹ Ñ…Ð°Ð´Ð³Ð°Ð»Ð°Ð¼Ð¶ Ó©Ð½Ð´Ó©Ñ€ Ñ…Ò¯Ò¯Ñ‚ÑÐ¹', range: 'â‚®1,000,000 - â‚®50,000,000', rate: '12.5', unit: '% /Ð¶Ð¸Ð»', btn: 'Ð”Ð­Ð›Ð“Ð­Ð Ð­ÐÐ“Ò®Ð™', gradient: 'from-[#006040] to-[#008060]', accent: 'from-[#00C853] to-[#009624]', img: 'https://images.unsplash.com/photo-1633158829585-23ba8f7c8caf?w=400&h=400&fit=crop' },
   ];
 
   useEffect(() => {
@@ -826,13 +826,13 @@ export default function App() {
     return () => clearInterval(timer);
   }, [step, ads.length]);
 
-  // Видео зар - автоматаар тоглогдоно
+  // Ð’Ð¸Ð´ÐµÐ¾ Ð·Ð°Ñ€ - Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð°Ð°Ñ€ Ñ‚Ð¾Ð³Ð»Ð¾Ð³Ð´Ð¾Ð½Ð¾
   const [videoAdIndex, setVideoAdIndex] = useState(0);
   const videoRef = useRef(null);
   const videoAds = [
-    { src: 'https://www.w3schools.com/html/mov_bbb.mp4', title: 'ББСБ - Хэрэглээний зээл 2.9%' },
-    { src: 'https://www.w3schools.com/html/movie.mp4', title: 'Даатгал - Эрүүл мэндийн даатгал' },
-    { src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm', title: 'Хадгаламж - 12.5% өндөр хүү' },
+    { src: 'https://www.w3schools.com/html/mov_bbb.mp4', title: 'Ð‘Ð‘Ð¡Ð‘ - Ð¥ÑÑ€ÑÐ³Ð»ÑÑÐ½Ð¸Ð¹ Ð·ÑÑÐ» 2.9%' },
+    { src: 'https://www.w3schools.com/html/movie.mp4', title: 'Ð”Ð°Ð°Ñ‚Ð³Ð°Ð» - Ð­Ñ€Ò¯Ò¯Ð» Ð¼ÑÐ½Ð´Ð¸Ð¹Ð½ Ð´Ð°Ð°Ñ‚Ð³Ð°Ð»' },
+    { src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm', title: 'Ð¥Ð°Ð´Ð³Ð°Ð»Ð°Ð¼Ð¶ - 12.5% Ó©Ð½Ð´Ó©Ñ€ Ñ…Ò¯Ò¯' },
   ];
 
   const handleVideoEnded = () => {
@@ -869,10 +869,10 @@ export default function App() {
   };
 
   const getFileIcon = (type) => {
-    if (type.startsWith('image/')) return '🖼️';
-    if (type.startsWith('video/')) return '🎬';
-    if (type.startsWith('audio/')) return '🎵';
-    return '📎';
+    if (type.startsWith('image/')) return 'ðŸ–¼ï¸';
+    if (type.startsWith('video/')) return 'ðŸŽ¬';
+    if (type.startsWith('audio/')) return 'ðŸŽµ';
+    return 'ðŸ“Ž';
   };
 
   const formatSize = (bytes) => {
@@ -1170,8 +1170,8 @@ export default function App() {
     setIsAnimatingStars(false);
   };
 
-  const branches = Array.from({ length: 16 }, (_, i) => `Салбар ${i + 1}`);
-  const recipients = ['Менежер', 'Салбарын захирал', 'Хүний нөөц', 'Маркетинг алба'];
+  const branches = Array.from({ length: 16 }, (_, i) => `Ð¡Ð°Ð»Ð±Ð°Ñ€ ${i + 1}`);
+  const recipients = ['ÐœÐµÐ½ÐµÐ¶ÐµÑ€', 'Ð¡Ð°Ð»Ð±Ð°Ñ€Ñ‹Ð½ Ð·Ð°Ñ…Ð¸Ñ€Ð°Ð»', 'Ð¥Ò¯Ð½Ð¸Ð¹ Ð½Ó©Ó©Ñ†', 'ÐœÐ°Ñ€ÐºÐµÑ‚Ð¸Ð½Ð³ Ð°Ð»Ð±Ð°'];
 
 
   // eslint-disable-next-line no-unused-vars
@@ -1193,7 +1193,7 @@ export default function App() {
 
   // Header component removed - no longer used
 
-  // Сурталчилгааны баннер - 3 секунд болгонд солигдоно
+  // Ð¡ÑƒÑ€Ñ‚Ð°Ð»Ñ‡Ð¸Ð»Ð³Ð°Ð°Ð½Ñ‹ Ð±Ð°Ð½Ð½ÐµÑ€ - 3 ÑÐµÐºÑƒÐ½Ð´ Ð±Ð¾Ð»Ð³Ð¾Ð½Ð´ ÑÐ¾Ð»Ð¸Ð³Ð´Ð¾Ð½Ð¾
   // eslint-disable-next-line no-unused-vars
   const renderAdBanner = (extraClass = '') => {
     const ad = ads[adIndex];
@@ -1221,7 +1221,7 @@ export default function App() {
     );
   };
 
-  // Видео зарын баннер
+  // Ð’Ð¸Ð´ÐµÐ¾ Ð·Ð°Ñ€Ñ‹Ð½ Ð±Ð°Ð½Ð½ÐµÑ€
   // eslint-disable-next-line no-unused-vars
   const renderVideoBanner = (extraClass = '') => {
     const vid = videoAds[videoAdIndex];
@@ -1310,7 +1310,7 @@ export default function App() {
         @keyframes scaleIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         .animate-scaleIn { animation: scaleIn 0.2s ease-out forwards; }
 
-        /* Зургууд үсэрч гарч ирэх анимейшн */
+        /* Ð—ÑƒÑ€Ð³ÑƒÑƒÐ´ Ò¯ÑÑÑ€Ñ‡ Ð³Ð°Ñ€Ñ‡ Ð¸Ñ€ÑÑ… Ð°Ð½Ð¸Ð¼ÐµÐ¹ÑˆÐ½ */
         @keyframes bounceIn {
           0% { transform: scale(0.3); opacity: 0; }
           60% { transform: scale(1.1); opacity: 1; }
@@ -1320,7 +1320,7 @@ export default function App() {
           animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
         }
 
-        /* Одын цацралт анимейшн */
+        /* ÐžÐ´Ñ‹Ð½ Ñ†Ð°Ñ†Ñ€Ð°Ð»Ñ‚ Ð°Ð½Ð¸Ð¼ÐµÐ¹ÑˆÐ½ */
         @keyframes flyOut {
           0% { transform: translate(0, 0) scale(1); opacity: 1; }
           100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
@@ -1377,7 +1377,7 @@ export default function App() {
           const diff = e.changedTouches[0].clientX - globalSwipeRef.current;
           globalSwipeRef.current = null;
           if (diff > 80) {
-            if (step === 3 && activeTab !== 'select' && feedbackType !== 'Хүсэлт') {
+            if (step === 3 && activeTab !== 'select' && feedbackType !== 'Ð¥Ò¯ÑÑÐ»Ñ‚') {
               setActiveTab('select');
             } else if (step === 3) {
               setStep(2); setActiveTab('select'); setShowWarning(false);
@@ -1483,7 +1483,7 @@ export default function App() {
                 {/* Hint text */}
                 <div className="flex items-center gap-1.5 mb-4 z-10">
                   <span className="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
-                  <p className="font-poppins text-white text-[11px] font-medium tracking-wide">{'\u0422\u0430 \u04e9\u04e9\u0440\u0438\u0439\u043d\u0445\u04e9\u04e9 \u043d\u04af\u04af\u0440 \u0434\u04af\u0440\u0438\u0439\u0433 \u0441\u043e\u043d\u0433\u043e\u043e\u0440\u043e\u0439'}</p>
+                  <p className="font-poppins text-white text-[11px] font-medium tracking-wide">{'\u0422\u0430 \u04e9\u04e9\u0440\u0438\u0439\u043d\u0445\u04e9\u04e9 \u043d\u0443\u0443\u0446 \u0434\u04af\u0440\u0438\u0439\u0433 \u0441\u043e\u043d\u0433\u043e\u043e\u0440\u043e\u0439'}</p>
                 </div>
 
                 {/* Continue button - INSIDE green panel */}
@@ -1539,7 +1539,7 @@ export default function App() {
 
               {/* Three menu cards */}
               <div className="px-4 grid grid-cols-2 gap-3">
-                {/* Хүсэлт илгээх */}
+                {/* Ð¥Ò¯ÑÑÐ»Ñ‚ Ð¸Ð»Ð³ÑÑÑ… */}
                 <button
                   onClick={() => { setFeedbackType('\u0425\u04af\u0441\u044d\u043b\u0442'); setStep(3); }}
                   className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative"
@@ -1548,7 +1548,7 @@ export default function App() {
                   <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
                   <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
-                {/* Гомдол илгээх */}
+                {/* Ð“Ð¾Ð¼Ð´Ð¾Ð» Ð¸Ð»Ð³ÑÑÑ… */}
                 <button
                   onClick={() => { setFeedbackType('\u0413\u043e\u043c\u0434\u043e\u043b'); setStep(3); }}
                   className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] relative"
@@ -1557,7 +1557,7 @@ export default function App() {
                   <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
                   <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">{`\u0413\u043e\u043c\u0434\u043e\u043b \u0438\u043b\u0433\u044d\u044d\u0445`}</span>
                 </button>
-                {/* Талархал илгээх */}
+                {/* Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð°Ð» Ð¸Ð»Ð³ÑÑÑ… */}
                 <button
                   onClick={() => { setFeedbackType('\u0422\u0430\u043b\u0430\u0440\u0445\u0430\u043b'); setStep(3); }}
                   className="rounded-2xl overflow-hidden flex flex-col justify-end aspect-square transition-all hover:scale-[1.02] active:scale-[0.97] col-span-1 relative"
@@ -1571,7 +1571,7 @@ export default function App() {
           )}
 
           {/* STEP 3 - Dark themed feedback page */}
-          {step === 3 && feedbackType === 'Хүсэлт' && !showSuccess && (
+          {step === 3 && feedbackType === 'Ð¥Ò¯ÑÑÐ»Ñ‚' && !showSuccess && (
             <div className="w-full min-h-screen bg-[#0f0f2e] animate-fadeIn flex flex-col">
 
               {/* Ad banner carousel */}
@@ -1688,7 +1688,7 @@ export default function App() {
             </div>
           )}
 
-          {step === 3 && feedbackType !== 'Хүсэлт' && (
+          {step === 3 && feedbackType !== 'Ð¥Ò¯ÑÑÐ»Ñ‚' && (
           <div className="w-full min-h-screen animate-fadeIn" style={{ backgroundColor: activeTab === 'person' ? '#0048BA' : '#0f0f2e' }}>
 
             <div className="p-4 sm:p-6 pt-8 sm:pt-10"
@@ -1708,7 +1708,7 @@ export default function App() {
                 }
               }}
             >
-            {/* ГОМДОЛ / ТАЛАРХАЛ flow */}
+            {/* Ð“ÐžÐœÐ”ÐžÐ› / Ð¢ÐÐ›ÐÐ Ð¥ÐÐ› flow */}
             {(activeTab === 'select' || activeTab === 'org' || activeTab === 'person') ? (
               <>
                 {/* Ad banner carousel */}
@@ -1740,10 +1740,10 @@ export default function App() {
 
                 {/* Title */}
                 <div className="text-center mt-6 mb-5">
-                  <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black">{feedbackType === 'Гомдол' ? 'Гомдлын хэсэг' : 'Талархлын хэсэг'}</h2>
+                  <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black">{feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' ? 'Ð“Ð¾Ð¼Ð´Ð»Ñ‹Ð½ Ñ…ÑÑÑÐ³' : 'Ð¢Ð°Ð»Ð°Ñ€Ñ…Ð»Ñ‹Ð½ Ñ…ÑÑÑÐ³'}</h2>
                 </div>
 
-                {/* Two cards - Байгууллага / Ажилтан */}
+                {/* Two cards - Ð‘Ð°Ð¹Ð³ÑƒÑƒÐ»Ð»Ð°Ð³Ð° / ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½ */}
                 <div className="grid grid-cols-2 gap-4 px-4 mb-4">
                   <button 
                     onClick={() => setActiveTab(activeTab === 'org' ? 'select' : 'org')}
@@ -1751,7 +1751,7 @@ export default function App() {
                     style={{ background: 'linear-gradient(135deg, #4A90D9 0%, #357ABD 100%)' }}
                   >
                     <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Байгууллага</span>
+                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Ð‘Ð°Ð¹Ð³ÑƒÑƒÐ»Ð»Ð°Ð³Ð°</span>
                   </button>
                   <button 
                     onClick={() => setActiveTab(activeTab === 'person' ? 'select' : 'person')}
@@ -1759,7 +1759,7 @@ export default function App() {
                     style={{ background: 'linear-gradient(135deg, #4A4A5A 0%, #333340 100%)' }}
                   >
                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">Ажилтан</span>
+                    <span className="font-poppins text-gray-800 text-sm lg:text-base font-bold bg-white rounded-xl mx-3 mb-3 px-3 py-2 text-center relative z-10">ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½</span>
                   </button>
                 </div>
 
@@ -1768,7 +1768,7 @@ export default function App() {
                     <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
                       <span className="text-white text-[9px] font-bold">!</span>
                     </div>
-                    <p className="font-poppins text-gray-400 text-[10px]">Тандаа тохирох хэсгээ сонгоно уу?</p>
+                    <p className="font-poppins text-gray-400 text-[10px]">Ð¢Ð°Ð½Ð´Ð°Ð° Ñ‚Ð¾Ñ…Ð¸Ñ€Ð¾Ñ… Ñ…ÑÑÐ³ÑÑ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ?</p>
                   </div>
                 )}
 
@@ -1776,9 +1776,9 @@ export default function App() {
                 {activeTab === 'org' && (
                   <div className="mt-4 animate-fadeIn">
                     {/* Title */}
-                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Байгууллагад илгээх\nгомдол' : 'Байгууллагад илгээх\nталархал'}</h2>
+                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' ? 'Ð‘Ð°Ð¹Ð³ÑƒÑƒÐ»Ð»Ð°Ð³Ð°Ð´ Ð¸Ð»Ð³ÑÑÑ…\nÐ³Ð¾Ð¼Ð´Ð¾Ð»' : 'Ð‘Ð°Ð¹Ð³ÑƒÑƒÐ»Ð»Ð°Ð³Ð°Ð´ Ð¸Ð»Ð³ÑÑÑ…\nÑ‚Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»'}</h2>
 
-                    {feedbackType === 'Гомдол' && (
+                    {feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' && (
                     <>
                     {/* Name input */}
                     <div className="mx-4 mb-3 flex items-center gap-3">
@@ -1787,7 +1787,7 @@ export default function App() {
                         type="text"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Таны нэр ..."
+                        placeholder="Ð¢Ð°Ð½Ñ‹ Ð½ÑÑ€ ..."
                         className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                       />
                     </div>
@@ -1799,7 +1799,7 @@ export default function App() {
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Холбогдох утас ..."
+                        placeholder="Ð¥Ð¾Ð»Ð±Ð¾Ð³Ð´Ð¾Ñ… ÑƒÑ‚Ð°Ñ ..."
                         className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                       />
                     </div>
@@ -1808,22 +1808,22 @@ export default function App() {
 
                     {/* Textarea card */}
                     <div className="mx-0 mb-4 bg-white rounded-2xl p-4 pb-8">
-                      <p className="font-poppins text-gray-800 text-sm font-bold mb-2">Хүсэлт бичих</p>
+                      <p className="font-poppins text-gray-800 text-sm font-bold mb-2">Ð¥Ò¯ÑÑÐ»Ñ‚ Ð±Ð¸Ñ‡Ð¸Ñ…</p>
                       <div className="border-t-2 border-gray-400 rounded-t-2xl h-[72px] -mx-4"></div>
                       <textarea
                         value={detail}
                         onChange={(e) => setDetail(e.target.value)}
-                        placeholder="Энд бичнэ үү ..."
+                        placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯ ..."
                         rows={7}
                         className="w-full font-poppins text-gray-700 text-sm outline-none resize-none placeholder-gray-400 -mt-14"
                       />
                     </div>
 
-                    {feedbackType === 'Гомдол' ? (
+                    {feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' ? (
                     <>
                     {/* File attachment */}
                     <div className="mx-0 mb-4">
-                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Холбогдох баримт, зураг хавсаргах:</p>
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Ð¥Ð¾Ð»Ð±Ð¾Ð³Ð´Ð¾Ñ… Ð±Ð°Ñ€Ð¸Ð¼Ñ‚, Ð·ÑƒÑ€Ð°Ð³ Ñ…Ð°Ð²ÑÐ°Ñ€Ð³Ð°Ñ…:</p>
                       <input
                         type="file"
                         multiple
@@ -1851,7 +1851,7 @@ export default function App() {
                                 <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
                                 <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
                               </div>
-                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
+                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">Ã—</button>
                             </div>
                           ))}
                         </div>
@@ -1879,13 +1879,13 @@ export default function App() {
                       <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
                         <span className="text-white text-xs font-bold leading-none">!</span>
                       </div>
-                      <p className="font-poppins text-white/60 text-[11px]">Талбар бүрэн бөглөгдөөгүй байна.</p>
+                      <p className="font-poppins text-white/60 text-[11px]">Ð¢Ð°Ð»Ð±Ð°Ñ€ Ð±Ò¯Ñ€ÑÐ½ Ð±Ó©Ð³Ð»Ó©Ð³Ð´Ó©Ó©Ð³Ò¯Ð¹ Ð±Ð°Ð¹Ð½Ð°.</p>
                     </div>
                     )}
 
                     {/* Submit button */}
                     <div className="mx-0 mt-4 mb-8">
-                      <button onClick={() => { if (!userName.trim() || !phone.trim() || !detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Илгээх</button>
+                      <button onClick={() => { if (!userName.trim() || !phone.trim() || !detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Ð˜Ð»Ð³ÑÑÑ…</button>
                     </div>
                   </div>
                 )}
@@ -1894,11 +1894,11 @@ export default function App() {
                 {activeTab === 'person' && (
                   <div className="mt-4 animate-fadeIn">
                     {/* Title */}
-                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Гомдол' ? 'Ажилтанд илгээх\nгомдол' : 'Ажилтанд илгээх\nталархал'}</h2>
+                    <h2 className="font-montserrat text-white text-lg lg:text-2xl font-black text-center mb-5">{feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' ? 'ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½Ð´ Ð¸Ð»Ð³ÑÑÑ…\nÐ³Ð¾Ð¼Ð´Ð¾Ð»' : 'ÐÐ¶Ð¸Ð»Ñ‚Ð°Ð½Ð´ Ð¸Ð»Ð³ÑÑÑ…\nÑ‚Ð°Ð»Ð°Ñ€Ñ…Ð°Ð»'}</h2>
 
                     {/* Branch selector - white card with swipe */}
                     <div className="mx-4 mb-4 bg-white rounded-2xl p-4">
-                      <p className="font-poppins text-gray-800 text-sm font-bold mb-3">Та салбараа сонгоно уу?</p>
+                      <p className="font-poppins text-gray-800 text-sm font-bold mb-3">Ð¢Ð° ÑÐ°Ð»Ð±Ð°Ñ€Ð°Ð° ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ?</p>
                       <div className="flex items-center gap-3 mt-12 px-8">
                         <button onClick={() => setSelectedBranch(prev => prev <= 0 ? branches.length - 1 : prev - 1)} className="text-[#0048BA] flex-shrink-0">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -1906,8 +1906,9 @@ export default function App() {
                         <div
                           className="flex-1 rounded-2xl overflow-hidden relative bg-gray-100"
                           style={{ aspectRatio: '1/1' }}
-                          onTouchStart={(e) => { branchSwipeRef.current = e.touches[0].clientX; }}
+                          onTouchStart={(e) => { e.stopPropagation(); branchSwipeRef.current = e.touches[0].clientX; }}
                           onTouchEnd={(e) => {
+                            e.stopPropagation();
                             if (branchSwipeRef.current === null) return;
                             const diff = e.changedTouches[0].clientX - branchSwipeRef.current;
                             branchSwipeRef.current = null;
@@ -1919,7 +1920,7 @@ export default function App() {
                             <img src={branchImages[selectedBranch]} alt={branches[selectedBranch]} className="absolute inset-0 w-full h-full object-cover" />
                           )}
                           <div className="absolute inset-0 flex items-end justify-center pb-3">
-                            <span className="font-poppins text-gray-800 text-xs font-bold bg-white rounded-full px-10 py-2">Сонгох</span>
+                            <span className="font-poppins text-gray-800 text-xs font-bold bg-white rounded-full px-10 py-2">Ð¡Ð¾Ð½Ð³Ð¾Ñ…</span>
                           </div>
                         </div>
                         <button onClick={() => setSelectedBranch(prev => (prev + 1) % branches.length)} className="text-[#0048BA] flex-shrink-0">
@@ -1928,7 +1929,7 @@ export default function App() {
                       </div>
 
                       {/* Selected branch name */}
-                      <p className="font-montserrat text-gray-800 text-sm font-black text-center mt-3">{branches[selectedBranch]} салбар</p>
+                      <p className="font-montserrat text-gray-800 text-sm font-black text-center mt-3">{branches[selectedBranch]} ÑÐ°Ð»Ð±Ð°Ñ€</p>
                     </div>
 
                     {/* Name input */}
@@ -1938,19 +1939,19 @@ export default function App() {
                         type="text"
                         value={workerName}
                         onChange={(e) => setWorkerName(e.target.value)}
-                        placeholder="Ажилтны нэр ... (Заавал биш)"
+                        placeholder="ÐÐ¶Ð¸Ð»Ñ‚Ð½Ñ‹ Ð½ÑÑ€ ... (Ð—Ð°Ð°Ð²Ð°Ð» Ð±Ð¸Ñˆ)"
                         className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                       />
                     </div>
 
-                    {feedbackType === 'Гомдол' && (
+                    {feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' && (
                     <div className="mx-4 mb-5 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                       <input
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="Холбогдох утас ..."
+                        placeholder="Ð¥Ð¾Ð»Ð±Ð¾Ð³Ð´Ð¾Ñ… ÑƒÑ‚Ð°Ñ ..."
                         className="flex-1 bg-gray-400 rounded-full px-5 py-3.5 font-poppins text-white text-base outline-none placeholder-white/80"
                       />
                     </div>
@@ -1958,13 +1959,13 @@ export default function App() {
 
                     {/* Position selector */}
                     <div className="mx-4 mb-4">
-                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">Албан тушаал</p>
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">ÐÐ»Ð±Ð°Ð½ Ñ‚ÑƒÑˆÐ°Ð°Ð»</p>
                       <div className="relative">
                         <button
                           onClick={() => setPositionDropdownOpen(!positionDropdownOpen)}
                           className="w-full bg-white rounded-2xl px-4 py-3 flex items-center justify-between font-poppins text-sm"
                         >
-                          <span className={selectedPosition ? 'text-gray-800 font-bold' : 'text-gray-400'}>{selectedPosition || 'Сонгох'}</span>
+                          <span className={selectedPosition ? 'text-gray-800 font-bold' : 'text-gray-400'}>{selectedPosition || 'Ð¡Ð¾Ð½Ð³Ð¾Ñ…'}</span>
                           <svg className={`w-4 h-4 text-gray-500 transition-transform ${positionDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         {positionDropdownOpen && (
@@ -1985,23 +1986,23 @@ export default function App() {
 
                     {/* Detail textarea - white card */}
                     <div className="mx-4 mb-4">
-                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">Дэлгэрэнгүй</p>
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2">Ð”ÑÐ»Ð³ÑÑ€ÑÐ½Ð³Ò¯Ð¹</p>
                       <div className="bg-white rounded-2xl p-4 pb-8">
                         <textarea
                           value={detail}
                           onChange={(e) => setDetail(e.target.value)}
-                          placeholder="Энд бичнэ үү..."
+                          placeholder="Ð­Ð½Ð´ Ð±Ð¸Ñ‡Ð½Ñ Ò¯Ò¯..."
                           rows={6}
                           className="w-full font-poppins text-gray-700 text-sm outline-none resize-none placeholder-gray-400"
                         />
                       </div>
                     </div>
 
-                    {feedbackType === 'Гомдол' ? (
+                    {feedbackType === 'Ð“Ð¾Ð¼Ð´Ð¾Ð»' ? (
                     <>
                     {/* File attachment */}
                     <div className="mx-4 mb-4">
-                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Холбогдох баримт, зураг хавсаргах:</p>
+                      <p className="font-poppins text-white/70 text-sm font-bold tracking-wide mb-2 text-center">Ð¥Ð¾Ð»Ð±Ð¾Ð³Ð´Ð¾Ñ… Ð±Ð°Ñ€Ð¸Ð¼Ñ‚, Ð·ÑƒÑ€Ð°Ð³ Ñ…Ð°Ð²ÑÐ°Ñ€Ð³Ð°Ñ…:</p>
                       <input
                         type="file"
                         multiple
@@ -2029,7 +2030,7 @@ export default function App() {
                                 <p className="font-poppins text-white text-[11px] truncate">{f.name}</p>
                                 <p className="font-poppins text-white/70 text-[9px]">{formatSize(f.size)}</p>
                               </div>
-                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">×</button>
+                              <button onClick={() => removeFile(f.id)} className="text-white/70 hover:text-red-400 text-[14px] flex-shrink-0 leading-none">Ã—</button>
                             </div>
                           ))}
                         </div>
@@ -2053,7 +2054,7 @@ export default function App() {
 
                     {/* Submit button */}
                     <div className="mx-4 mt-4 mb-8">
-                      <button onClick={() => { if (!detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Илгээх</button>
+                      <button onClick={() => { if (!detail.trim()) { setShowWarning(true); } else { setShowWarning(false); setShowSuccess(true); } }} className="w-full py-3.5 font-opensans bg-[#6C3CE1] rounded-full font-extrabold text-sm tracking-wider text-white shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.97] transition-all">Ð˜Ð»Ð³ÑÑÑ…</button>
                     </div>
                   </div>
                 )}
@@ -2088,4 +2089,5 @@ export default function App() {
     </>
   );
 }
+
 
