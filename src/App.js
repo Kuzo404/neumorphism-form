@@ -1604,7 +1604,7 @@ export default function App() {
               <h2 className="font-montserrat text-white text-xl lg:text-3xl font-black text-center mt-6 lg:mt-8 mb-5">{`\u0425\u04af\u0441\u044d\u043b\u0442 \u0445\u044d\u0441\u044d\u0433`}</h2>
 
               {/* Name input */}
-              <div className="mx-12 mb-3 flex items-center gap-3">
+              <div className="ml-12 mr-20 mb-3 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                 <input
                   type="text"
@@ -1616,7 +1616,7 @@ export default function App() {
               </div>
 
               {/* Phone input */}
-              <div className="mx-12 mb-5 flex items-center gap-3">
+              <div className="ml-12 mr-20 mb-5 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-500 flex-shrink-0"></div>
                 <input
                   type="tel"
